@@ -32,8 +32,7 @@ exports.createPreference = async (req, res) => {
              success: `${frontendUrl}/admin?payment=success`,
              failure: `${frontendUrl}/admin?payment=failure`,
              pending: `${frontendUrl}/admin?payment=pending`
-         },
-         auto_return: "approved"
+         }
      };
 
      const result = await preference.create({ body });
