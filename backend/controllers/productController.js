@@ -117,3 +117,21 @@ exports.getHeroText = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener configuracion hero' });
   }
 };
+
+exports.checkSku = async (req, res) => {
+  const { sku, currentId } = req.query;
+  if (!sku) return res.status(400).json({ error: 'SKU is required' });
+  try {
+    let query = 'SELECT id FROM variantes_producto WHERE sku = ?';
+    let params = [sku];
+    if (currentId) {
+      query += ' AND id != ?';
+      params.push(currentId);
+    }
+    const [rows] = await db.query(query, params);
+    res.json({ unique: rows.length === 0 });
+  } catch (err) {
+    console.error('Check SKU error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
