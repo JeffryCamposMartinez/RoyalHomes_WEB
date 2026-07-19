@@ -70,6 +70,28 @@ export default function BillingManager({ user }) {
     }
   };
 
+  const handleMercadoPago = async () => {
+    try {
+      showAlert('Conectando con Mercado Pago...', 'info');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/billing/create-preference`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.accessToken}` 
+        },
+        body: JSON.stringify({ invoiceIds: selectedInvoiceIds })
+      });
+      const data = await res.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        showAlert(data.error || 'Error al iniciar el pago', 'error');
+      }
+    } catch (err) {
+      showAlert('Error de conexión con la pasarela', 'error');
+    }
+  };
+
   const handleDownloadReceipt = (invoice, payment) => {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -321,7 +343,7 @@ export default function BillingManager({ user }) {
           {unpaidInvoices.length > 0 && selectedInvoiceIds.length > 0 && (
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button 
-                onClick={() => showAlert('La integración con MercadoPago estará disponible pronto.', 'info')}
+                onClick={handleMercadoPago}
                 className="flex-1 flex items-center justify-center gap-2 bg-[#009EE3] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#008CC9] transition-colors shadow-sm"
               >
                 <span className="material-symbols-outlined">payments</span>

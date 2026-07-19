@@ -1,4 +1,47 @@
 const billingDb = require('../config/billingDb');
+const { MercadoPagoConfig, Preference } = require('mercadopago');
+
+exports.createPreference = async (req, res) => {
+  const { invoiceIds } = req.body;
+  const ids = Array.isArray(invoiceIds) ? invoiceIds : [req.body.invoiceId];
+
+  try {
+     if (!ids || ids.length === 0) return res.status(400).json({error: 'No se enviaron facturas'});
+     const [invoices] = await billingDb.query('SELECT * FROM invoices WHERE id IN (?)', [ids]);
+     if (invoices.length === 0) return res.status(404).json({error: 'Facturas no encontradas'});
+
+     const totalAmount = invoices.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+     const description = invoices.length > 1 ? `Pago de ${invoices.length} facturas de Hosting` : `Mensualidad de Hosting`;
+
+     const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+     const preference = new Preference(client);
+
+     const body = {
+         items: [
+             {
+                 id: ids.join(','),
+                 title: description,
+                 quantity: 1,
+                 unit_price: totalAmount,
+                 currency_id: 'CLP',
+             }
+         ],
+         back_urls: {
+             success: "http://localhost:5173/admin/subscription?payment=success",
+             failure: "http://localhost:5173/admin/subscription?payment=failure",
+             pending: "http://localhost:5173/admin/subscription?payment=pending"
+         },
+         auto_return: "approved"
+     };
+
+     const result = await preference.create({ body });
+     res.json({ id: result.id, init_point: result.init_point });
+  } catch (err) {
+     console.error('Error creating MP preference:', err);
+     res.status(500).json({ error: 'Error al crear la preferencia de pago' });
+  }
+};
+
 
 exports.getBillingDashboard = async (req, res) => {
   try {
@@ -58,5 +101,24 @@ exports.reportTransfer = async (req, res) => {
   } catch(err) {
      console.error('Error reporting transfer:', err);
      res.status(500).json({ error: 'Error interno al reportar el pago' });
+  }
+};
+
+// --- ENDPOINTS PARA EL ADMIN C++ ---
+exports.getAllClients = async (req, res) => {
+  try {
+    const [clients] = await billingDb.query('SELECT * FROM clients');
+    res.json(clients);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getAllInvoices = async (req, res) => {
+  try {
+    const [invoices] = await billingDb.query('SELECT * FROM invoices');
+    res.json(invoices);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
