@@ -67,7 +67,8 @@ export default function BillingManager({ user }) {
   }
 
   const { client, subscription, invoices, payments } = billingData;
-  const currentInvoice = invoices.find(i => i.status === 'pending' || i.status === 'overdue');
+  // Buscamos la factura impaga más antigua (para que pague las deudas primero)
+  const currentInvoice = [...invoices].reverse().find(i => i.status === 'pending' || i.status === 'overdue');
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
