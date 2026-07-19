@@ -33,7 +33,7 @@ exports.getProducts = async (req, res) => {
   try {
     const categoryId = req.query.category;
     let query = `
-      SELECT p.id, p.nombre as name, p.descripcion as description, p.precio_base as price, p.imagen_base as image, p.galeria as gallery, p.activo as inStock, c.nombre as category, c.id as categoryId,
+      SELECT p.id, p.nombre as name, p.descripcion as description, p.especificaciones as specifications, p.precio_base as price, p.imagen_base as image, p.galeria as gallery, p.activo as inStock, c.nombre as category, c.id as categoryId,
              (SELECT MAX(descuento_porcentaje) FROM configuracion_portada WHERE categoria_id = c.id) as discount_percentage
       FROM productos p 
       JOIN categorias c ON p.categoria_id = c.id

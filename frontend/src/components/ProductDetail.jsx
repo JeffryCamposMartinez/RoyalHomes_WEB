@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 function ProductDetail({ product, onBack, onAddToCart }) {
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [showSpecs, setShowSpecs] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -99,7 +100,12 @@ function ProductDetail({ product, onBack, onAddToCart }) {
         <div className="flex-1 flex flex-col justify-start md:justify-center">
           <p className="font-caption text-[10px] md:text-caption text-on-surface-variant mb-1 md:mb-4 uppercase tracking-widest">{product.category}</p>
           <h1 className="font-display-lg text-2xl md:text-display-lg text-primary mb-2 md:mb-6 leading-tight">{product.name}</h1>
-          <p className="font-body-sm md:font-body-lg text-sm md:text-body-lg text-on-surface-variant mb-3 md:mb-8 leading-relaxed line-clamp-2 md:line-clamp-none">{product.description}</p>
+          <p className="font-body-sm md:font-body-lg text-sm md:text-body-lg text-on-surface-variant mb-1 md:mb-4 leading-relaxed line-clamp-2 md:line-clamp-none">{product.description}</p>
+          {product.specifications && (
+            <button onClick={() => setShowSpecs(true)} className="flex items-center gap-1 text-primary text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-8 hover:opacity-80 transition-opacity">
+              <span className="material-symbols-outlined text-[16px]">info</span> Ver Especificaciones
+            </button>
+          )}
           
           <div className="mb-3 md:mb-10">
             <h3 className="font-label-md text-xs md:text-label-md text-primary uppercase tracking-widest mb-2 md:mb-4">Seleccionar Variante</h3>
@@ -167,6 +173,23 @@ function ProductDetail({ product, onBack, onAddToCart }) {
           <span className="font-caption text-caption text-on-surface-variant text-center px-4">Espacio reservado para anuncio (Google Ads)</span>
         </div>
       </div>
+
+      {/* Specifications Modal */}
+      {showSpecs && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowSpecs(false)}>
+          <div className="bg-surface rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+            <div className="p-4 border-b border-outline-variant/30 flex justify-between items-center">
+              <h3 className="font-headline-sm text-headline-sm text-primary">Especificaciones</h3>
+              <button onClick={() => setShowSpecs(false)} className="text-on-surface-variant hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto whitespace-pre-wrap font-body-md text-on-surface-variant leading-relaxed">
+              {product.specifications}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

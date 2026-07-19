@@ -10,6 +10,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
   // Product State
   const [nombre, setNombre] = useState(product?.name || '');
   const [descripcion, setDescripcion] = useState(product?.description || '');
+  const [especificaciones, setEspecificaciones] = useState(product?.specifications || '');
   const [precioBase, setPrecioBase] = useState(product?.price ? Math.round(Number(product.price)) : '');
   const [categoriaId, setCategoriaId] = useState(product?.categoryId || (categories[0]?.id || ''));
   const [productId, setProductId] = useState(product?.id || null);
@@ -36,6 +37,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
     if (!isEdit) return true;
     if (nombre !== (product.name || '')) return true;
     if (descripcion !== (product.description || '')) return true;
+    if (especificaciones !== (product.specifications || '')) return true;
     if (String(precioBase) !== String(product.price || '')) return true;
     if (String(categoriaId) !== String(product.categoryId || '')) return true;
     if (galleryChanged) return true;
@@ -84,7 +86,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
     const imagenBase = finalUrls[0];
     const galeriaUrls = finalUrls.slice(1);
 
-    const payload = { nombre, descripcion, precio_base: precioBase, imagen_base: imagenBase, galeria: galeriaUrls, categoria_id: categoriaId };
+    const payload = { nombre, descripcion, especificaciones, precio_base: precioBase, imagen_base: imagenBase, galeria: galeriaUrls, categoria_id: categoriaId };
     try {
       const url = isEdit ? `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/products/${productId}` : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/products`;
       const method = isEdit ? 'PUT' : 'POST';
@@ -387,9 +389,15 @@ export default function ProductFormModal({ product, categories, user, onClose, o
                 )}
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Descripción</label>
-                <textarea required rows={4} value={descripcion} onChange={e => setDescripcion(e.target.value)} className="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-0 outline-none" />
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-1 flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Descripción</label>
+                  <textarea required rows={4} value={descripcion} onChange={e => setDescripcion(e.target.value)} className="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-0 outline-none" />
+                </div>
+                <div className="flex-1 flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Especificaciones</label>
+                  <textarea rows={4} placeholder="Medidas, materiales, cuidados..." value={especificaciones} onChange={e => setEspecificaciones(e.target.value)} className="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-0 outline-none" />
+                </div>
               </div>
             </form>
           )}

@@ -69,10 +69,10 @@ exports.getInventory = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { nombre, descripcion, precio_base, imagen_base, galeria, categoria_id } = req.body;
+    const { nombre, descripcion, especificaciones, precio_base, imagen_base, galeria, categoria_id } = req.body;
     const [result] = await db.query(
-      'INSERT INTO productos (nombre, descripcion, precio_base, imagen_base, galeria, categoria_id, activo) VALUES (?, ?, ?, ?, ?, ?, 1)',
-      [nombre, descripcion, precio_base, imagen_base, galeria ? JSON.stringify(galeria) : null, categoria_id]
+      'INSERT INTO productos (nombre, descripcion, especificaciones, precio_base, imagen_base, galeria, categoria_id, activo) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+      [nombre, descripcion, especificaciones || null, precio_base, imagen_base, galeria ? JSON.stringify(galeria) : null, categoria_id]
     );
     res.status(201).json({ id: result.insertId, message: 'Producto creado' });
   } catch (error) {
@@ -84,10 +84,10 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, precio_base, imagen_base, galeria, categoria_id } = req.body;
+    const { nombre, descripcion, especificaciones, precio_base, imagen_base, galeria, categoria_id } = req.body;
     await db.query(
-      'UPDATE productos SET nombre = ?, descripcion = ?, precio_base = ?, imagen_base = ?, galeria = ?, categoria_id = ? WHERE id = ?',
-      [nombre, descripcion, precio_base, imagen_base, galeria ? JSON.stringify(galeria) : null, categoria_id, id]
+      'UPDATE productos SET nombre = ?, descripcion = ?, especificaciones = ?, precio_base = ?, imagen_base = ?, galeria = ?, categoria_id = ? WHERE id = ?',
+      [nombre, descripcion, especificaciones || null, precio_base, imagen_base, galeria ? JSON.stringify(galeria) : null, categoria_id, id]
     );
     res.json({ message: 'Producto actualizado' });
   } catch (error) {
