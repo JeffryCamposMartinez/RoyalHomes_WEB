@@ -6,6 +6,13 @@ const fs = require('fs');
 const sharp = require('sharp');
 const db = require('../config/db');
 
+const getFullUrl = (url) => {
+  if (!url) return url;
+  if (url.startsWith('http')) return url;
+  const baseUrl = process.env.PUBLIC_BACKEND_URL || 'http://nk7qrdyo4oxvieqdl35lgi42.185.173.110.158.sslip.io';
+  return `${baseUrl}${url}`;
+};
+
 // Ensure destination directories exist
 const uploadDir = path.join(__dirname, '../uploads');
 const pubDir = path.join(__dirname, '../Publicidad');
@@ -57,7 +64,7 @@ router.get('/images', (req, res) => {
         const files = fs.readdirSync(targetDir);
         // Filter out non-images just in case
         const images = files.filter(f => /\.(jpg|jpeg|png|gif|webp|jfif|avif)$/i.test(f));
-        const urls = images.map(img => `/${folder}/${img}`);
+        const urls = images.map(img => getFullUrl(`/${folder}/${img}`));
         res.json(urls);
     } catch (error) {
         console.error('Error reading uploads directory:', error);

@@ -209,7 +209,11 @@ exports.getLayout = async (req, res) => {
       LEFT JOIN categorias c ON cp.categoria_id = c.id
       ORDER BY cp.slot_index ASC
     `);
-    res.json(layout);
+    res.json(layout.map(l => ({
+      ...l,
+      layout_imagen_url: getFullUrl(l.layout_imagen_url),
+      cat_imagen_url: getFullUrl(l.cat_imagen_url)
+    })));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error al obtener configuración de portada' });
