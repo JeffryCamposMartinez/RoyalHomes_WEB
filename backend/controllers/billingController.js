@@ -1,5 +1,5 @@
 const billingDb = require('../config/billingDb');
-const { MercadoPagoConfig, Preference } = require('mercadopago');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 
 exports.createPreference = async (req, res) => {
   const { invoiceIds } = req.body;
@@ -17,6 +17,7 @@ exports.createPreference = async (req, res) => {
      const preference = new Preference(client);
 
      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+     const backendUrl = process.env.PUBLIC_BACKEND_URL || "http://localhost:3001";
 
      const body = {
          items: [
@@ -32,7 +33,8 @@ exports.createPreference = async (req, res) => {
              success: `${frontendUrl}/admin?payment=success`,
              failure: `${frontendUrl}/admin?payment=failure`,
              pending: `${frontendUrl}/admin?payment=pending`
-         }
+         },
+         notification_url: `${backendUrl}/api/billing/webhook/mercadopago`
      };
 
      const result = await preference.create({ body });
@@ -43,7 +45,42 @@ exports.createPreference = async (req, res) => {
   }
 };
 
+exports.receiveWebhook = async (req, res) => {
+  res.sendStatus(200);
 
+  const paymentId = req.query.id || req.body?.data?.id;
+  const topic = req.query.topic || req.body?.type;
+
+  if (topic === 'payment' && paymentId) {
+    try {
+      const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+      const payment = new Payment(client);
+      const paymentData = await payment.get({ id: paymentId });
+
+      if (paymentData.status === 'approved') {
+        const invoiceIdsStr = paymentData.additional_info?.items?.[0]?.id;
+        if (invoiceIdsStr) {
+          const invoiceIds = invoiceIdsStr.split(',').map(id => parseInt(id));
+          const totalAmount = paymentData.transaction_amount;
+          
+          for (const invId of invoiceIds) {
+            await billingDb.query('UPDATE invoices SET status = "paid" WHERE id = ?', [invId]);
+            
+            const [existing] = await billingDb.query('SELECT id FROM payments WHERE invoice_id = ?', [invId]);
+            if (existing.length === 0) {
+              await billingDb.query(
+                'INSERT INTO payments (invoice_id, amount, payment_method, transaction_id, status) VALUES (?, ?, ?, ?, ?)',
+                [invId, totalAmount / invoiceIds.length, 'Mercado Pago', paymentData.id.toString(), 'completed']
+              );
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error procesando webhook MP', err);
+    }
+  }
+};
 exports.getBillingDashboard = async (req, res) => {
   try {
     // Por ahora usamos el dominio de la tienda hardcodeado o sacado del frontend
