@@ -22,7 +22,7 @@ async function convertFolder(folderPath) {
     for (const file of files) {
         if (file.endsWith('.webp')) continue; // Already webp
         
-        if (/\.(jpg|jpeg|png)$/i.test(file)) {
+        if (/\.(jpg|jpeg|png|jfif|avif)$/i.test(file)) {
             const ext = path.extname(file);
             const baseName = path.basename(file, ext);
             const inputPath = path.join(folderPath, file);
@@ -49,18 +49,18 @@ async function updateDatabase() {
     
     const queries = [
         // Productos
-        `UPDATE productos SET imagen_base = REPLACE(REPLACE(REPLACE(imagen_base, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp') WHERE imagen_base IS NOT NULL`,
-        `UPDATE productos SET galeria = REPLACE(REPLACE(REPLACE(galeria, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp') WHERE galeria IS NOT NULL`,
+        `UPDATE productos SET imagen_base = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(imagen_base, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp'), '.jfif', '.webp'), '.avif', '.webp') WHERE imagen_base IS NOT NULL`,
+        `UPDATE productos SET galeria = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(galeria, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp'), '.jfif', '.webp'), '.avif', '.webp') WHERE galeria IS NOT NULL`,
         
         // Variantes
-        `UPDATE variantes_producto SET imagen_variante = REPLACE(REPLACE(REPLACE(imagen_variante, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp') WHERE imagen_variante IS NOT NULL`,
-        `UPDATE variantes_producto SET galeria = REPLACE(REPLACE(REPLACE(galeria, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp') WHERE galeria IS NOT NULL`,
+        `UPDATE variantes_producto SET imagen_variante = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(imagen_variante, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp'), '.jfif', '.webp'), '.avif', '.webp') WHERE imagen_variante IS NOT NULL`,
+        `UPDATE variantes_producto SET galeria = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(galeria, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp'), '.jfif', '.webp'), '.avif', '.webp') WHERE galeria IS NOT NULL`,
         
         // Categorias
-        `UPDATE categorias SET imagen_url = REPLACE(REPLACE(REPLACE(imagen_url, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp') WHERE imagen_url IS NOT NULL`,
+        `UPDATE categorias SET imagen_url = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(imagen_url, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp'), '.jfif', '.webp'), '.avif', '.webp') WHERE imagen_url IS NOT NULL`,
         
         // Portada
-        `UPDATE configuracion_portada SET imagen_url = REPLACE(REPLACE(REPLACE(imagen_url, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp') WHERE imagen_url IS NOT NULL`
+        `UPDATE configuracion_portada SET imagen_url = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(imagen_url, '.jpg', '.webp'), '.jpeg', '.webp'), '.png', '.webp'), '.jfif', '.webp'), '.avif', '.webp') WHERE imagen_url IS NOT NULL`
     ];
     
     for (const q of queries) {
