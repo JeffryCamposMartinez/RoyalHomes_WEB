@@ -83,8 +83,8 @@ export default function BillingManager({ user }) {
         <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 shadow-sm col-span-1">
           <div className="flex justify-between items-start mb-6">
             <h3 className="font-label-lg text-primary uppercase tracking-widest">Plan Actual</h3>
-            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${subscription?.status === 'active' ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>
-              {subscription?.status || 'Inactivo'}
+            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${subscription?.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {subscription?.status === 'active' ? 'ACTIVO' : subscription?.status === 'suspended' ? 'SUSPENDIDO' : subscription?.status === 'cancelled' ? 'CANCELADO' : 'INACTIVO'}
             </span>
           </div>
           <p className="font-headline-sm text-on-surface mb-1">{subscription?.plan_name || 'Sin Plan'}</p>
@@ -110,17 +110,24 @@ export default function BillingManager({ user }) {
               {currentInvoice?.status === 'overdue' ? 'Pago Atrasado' : currentInvoice ? 'Próximo Pago' : 'Estado de Cuenta'}
             </h3>
             {currentInvoice ? (
-              <div className={`p-4 rounded-lg border flex flex-col sm:flex-row justify-between items-center gap-4 ${currentInvoice.status === 'overdue' ? 'bg-error/5 border-error/30' : 'bg-secondary/5 border-secondary/30'}`}>
+              <div className={`p-4 rounded-lg border flex flex-col sm:flex-row justify-between items-center gap-4 ${currentInvoice.status === 'overdue' ? 'bg-yellow-50 border-yellow-300' : 'bg-secondary/5 border-secondary/30'}`}>
                 <div>
-                  <p className={`font-bold ${currentInvoice.status === 'overdue' ? 'text-error' : 'text-on-surface'}`}>
-                    Mensualidad {currentInvoice.month_year}
-                  </p>
-                  <p className="text-sm text-on-surface-variant">
-                    Vence el {new Date(currentInvoice.due_date).toLocaleDateString()}
+                  <div className="flex items-center gap-2">
+                    {currentInvoice.status === 'overdue' && <span className="material-symbols-outlined text-yellow-600">warning</span>}
+                    <p className={`font-bold ${currentInvoice.status === 'overdue' ? 'text-yellow-700' : 'text-on-surface'}`}>
+                      Mensualidad {currentInvoice.month_year}
+                    </p>
+                  </div>
+                  <p className={`text-sm mt-1 ${currentInvoice.status === 'overdue' ? 'text-yellow-700 max-w-lg' : 'text-on-surface-variant'}`}>
+                    {currentInvoice.status === 'overdue' ? 
+                      'Tienes un atraso en tu pago. El límite máximo de atraso es de 30 días después de la fecha de vencimiento; pasado este plazo el servicio web será suspendido.' :
+                      `Vence el ${new Date(currentInvoice.due_date).toLocaleDateString()}`}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-headline-sm text-primary">${Number(currentInvoice.amount).toLocaleString('es-CL')}</p>
+                  <p className={`font-headline-sm ${currentInvoice.status === 'overdue' ? 'text-yellow-700' : 'text-primary'}`}>
+                    ${Number(currentInvoice.amount).toLocaleString('es-CL')}
+                  </p>
                 </div>
               </div>
             ) : (
