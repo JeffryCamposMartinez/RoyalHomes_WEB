@@ -16,6 +16,7 @@ function AdminLayout({ user }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [isSiteOpen, setIsSiteOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -170,7 +171,44 @@ function AdminLayout({ user }) {
       </nav>
 
       {/* Main Content Canvas */}
-      <main className="flex-1 px-container-margin-mobile md:px-container-margin-desktop pt-24 pb-28 md:py-16 overflow-y-auto w-full">
+      <main className="flex-1 px-container-margin-mobile md:px-container-margin-desktop pt-24 pb-28 md:pt-10 md:pb-16 overflow-y-auto w-full relative">
+        
+        {/* Top Right User Menu for Desktop */}
+        <div className="hidden md:flex absolute top-6 right-8 justify-end items-center gap-1 sm:gap-4 z-50">
+          <div 
+            className="relative flex items-center gap-1 sm:gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" 
+            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            onBlur={() => setTimeout(() => setIsUserMenuOpen(false), 200)}
+            tabIndex={0}
+          >
+            <span className="material-symbols-outlined text-[20px] sm:text-[24px]">account_circle</span>
+            <span className="font-label-md text-[10px] sm:text-sm whitespace-nowrap">Hola, {user?.nombre?.split(' ')[0]}</span>
+            <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`}>expand_more</span>
+            
+            {isUserMenuOpen && (
+              <div className="absolute top-full right-0 mt-4 w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden flex flex-col z-50 animate-in fade-in slide-in-from-top-2">
+                <Link 
+                  to="/profile"
+                  className="w-full px-4 py-3 text-left font-label-md text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2 transition-colors uppercase tracking-widest border-b border-outline-variant/20"
+                >
+                  <span className="material-symbols-outlined text-[18px]">person</span>
+                  Mi Perfil
+                </Link>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('user');
+                    sessionStorage.removeItem('user');
+                    window.location.href = '/login';
+                  }}
+                  className="w-full px-4 py-3 text-left font-label-md text-sm text-error hover:bg-error/10 flex items-center gap-2 transition-colors uppercase tracking-widest"
+                >
+                  <span className="material-symbols-outlined text-[18px]">logout</span>
+                  Salir
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         {activeTab === 'dashboard' ? (
           <>
             {/* Header Section */}
