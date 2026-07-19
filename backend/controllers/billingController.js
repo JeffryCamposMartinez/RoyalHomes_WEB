@@ -36,18 +36,25 @@ exports.getBillingDashboard = async (req, res) => {
 };
 
 exports.reportTransfer = async (req, res) => {
-  const { invoiceId, transactionId } = req.body;
+  const { invoiceIds, transactionId } = req.body;
+  // Soportar también invoiceId (legacy)
+  const ids = Array.isArray(invoiceIds) ? invoiceIds : [req.body.invoiceId];
+
   try {
-     const [invoice] = await billingDb.query('SELECT * FROM invoices WHERE id = ?', [invoiceId]);
-     if (invoice.length === 0) return res.status(404).json({error: 'Factura no encontrada'});
+     if (!ids || ids.length === 0) return res.status(400).json({error: 'No se enviaron facturas'});
+
+     const [invoices] = await billingDb.query('SELECT * FROM invoices WHERE id IN (?)', [ids]);
+     if (invoices.length === 0) return res.status(404).json({error: 'Facturas no encontradas'});
      
-     // Registrar el pago como pendiente de aprobación
-     await billingDb.query(
-         'INSERT INTO payments (invoice_id, amount, payment_method, transaction_id, status) VALUES (?, ?, ?, ?, ?)',
-         [invoiceId, invoice[0].amount, 'transferencia', transactionId, 'pending']
-     );
+     // Registrar el pago como pendiente de aprobación para CADA factura seleccionada
+     for(const invoice of invoices) {
+       await billingDb.query(
+           'INSERT INTO payments (invoice_id, amount, payment_method, transaction_id, status) VALUES (?, ?, ?, ?, ?)',
+           [invoice.id, invoice.amount, 'transferencia', transactionId, 'pending']
+       );
+     }
      
-     res.json({ success: true, message: 'Pago reportado con éxito.' });
+     res.json({ success: true, message: 'Pagos reportados con éxito.' });
   } catch(err) {
      console.error('Error reporting transfer:', err);
      res.status(500).json({ error: 'Error interno al reportar el pago' });

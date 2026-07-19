@@ -6,7 +6,7 @@ export default function BillingManager({ user }) {
   const [billingData, setBillingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showTransferModal, setShowTransferModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState([]);
   const [transactionId, setTransactionId] = useState('');
 
   const fetchBillingData = async () => {
@@ -27,6 +27,22 @@ export default function BillingManager({ user }) {
     fetchBillingData();
   }, []);
 
+  const unpaidInvoices = billingData?.invoices 
+    ? [...billingData.invoices].reverse().filter(i => i.status === 'pending' || i.status === 'overdue')
+    : [];
+
+  useEffect(() => {
+    if (unpaidInvoices.length > 0 && selectedInvoiceIds.length === 0) {
+      setSelectedInvoiceIds([unpaidInvoices[0].id]);
+    }
+  }, [billingData]);
+
+  const handleToggleInvoice = (index) => {
+    // Garantizar que se seleccionen en orden: desde 0 hasta el índice clickeado
+    const newSelected = unpaidInvoices.slice(0, index + 1).map(i => i.id);
+    setSelectedInvoiceIds(newSelected);
+  };
+
   const handleReportTransfer = async (e) => {
     e.preventDefault();
     if (!transactionId) return showAlert('Ingresa el número de transferencia', 'error');
@@ -38,7 +54,7 @@ export default function BillingManager({ user }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.accessToken}` 
         },
-        body: JSON.stringify({ invoiceId: selectedInvoice.id, transactionId })
+        body: JSON.stringify({ invoiceIds: selectedInvoiceIds, transactionId })
       });
       const data = await res.json();
       if (data.success) {
@@ -67,8 +83,9 @@ export default function BillingManager({ user }) {
   }
 
   const { client, subscription, invoices, payments } = billingData;
-  // Buscamos la factura impaga más antigua (para que pague las deudas primero)
-  const currentInvoice = [...invoices].reverse().find(i => i.status === 'pending' || i.status === 'overdue');
+  const selectedInvoicesData = unpaidInvoices.filter(i => selectedInvoiceIds.includes(i.id));
+  const totalToPay = selectedInvoicesData.reduce((sum, inv) => sum + Number(inv.amount), 0);
+  const hasOverdueSelected = selectedInvoicesData.some(i => i.status === 'overdue');
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -108,27 +125,50 @@ export default function BillingManager({ user }) {
         <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 shadow-sm col-span-1 lg:col-span-2 flex flex-col justify-between">
           <div>
             <h3 className="font-label-lg text-primary uppercase tracking-widest mb-6">
-              {currentInvoice?.status === 'overdue' ? 'Pago Atrasado' : currentInvoice ? 'Próximo Pago' : 'Estado de Cuenta'}
+              {hasOverdueSelected ? 'Pago Atrasado' : unpaidInvoices.length > 0 ? 'Próximo Pago' : 'Estado de Cuenta'}
             </h3>
-            {currentInvoice ? (
-              <div className={`p-4 rounded-lg border flex flex-col sm:flex-row justify-between items-center gap-4 ${currentInvoice.status === 'overdue' ? 'bg-yellow-50 border-yellow-300' : 'bg-secondary/5 border-secondary/30'}`}>
-                <div>
-                  <div className="flex items-center gap-2">
-                    {currentInvoice.status === 'overdue' && <span className="material-symbols-outlined text-yellow-600">warning</span>}
-                    <p className={`font-bold ${currentInvoice.status === 'overdue' ? 'text-yellow-700' : 'text-on-surface'}`}>
-                      Mensualidad {currentInvoice.month_year}
-                    </p>
+            
+            {unpaidInvoices.length > 0 ? (
+              <div className={`p-4 rounded-lg border flex flex-col gap-4 ${hasOverdueSelected ? 'bg-yellow-50 border-yellow-300' : 'bg-secondary/5 border-secondary/30'}`}>
+                {unpaidInvoices.map((invoice, index) => (
+                  <label key={invoice.id} className="flex items-center gap-3 cursor-pointer group hover:bg-surface-container-lowest/50 p-2 rounded transition-colors -m-2">
+                    <div className="relative flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedInvoiceIds.includes(invoice.id)}
+                        onChange={() => handleToggleInvoice(index)}
+                        className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer transition-all"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {invoice.status === 'overdue' && <span className="material-symbols-outlined text-yellow-600 text-sm">warning</span>}
+                        <p className={`font-bold ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-on-surface'}`}>
+                          Mensualidad {invoice.month_year}
+                        </p>
+                      </div>
+                      <p className={`text-sm mt-1 ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-on-surface-variant'}`}>
+                        Vence el {new Date(invoice.due_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-headline-sm ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-primary'}`}>
+                        ${Number(invoice.amount).toLocaleString('es-CL')}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+                
+                {hasOverdueSelected && (
+                  <div className="flex gap-2 text-sm text-yellow-700 mt-4 bg-yellow-100/50 p-3 rounded border border-yellow-200">
+                    <span className="material-symbols-outlined text-sm">warning</span>
+                    <p>Tienes atrasos. El límite máximo de atraso es de 30 días después de la fecha de vencimiento; pasado este plazo el servicio web será suspendido.</p>
                   </div>
-                  <p className={`text-sm mt-1 ${currentInvoice.status === 'overdue' ? 'text-yellow-700 max-w-lg' : 'text-on-surface-variant'}`}>
-                    {currentInvoice.status === 'overdue' ? 
-                      'Tienes un atraso en tu pago. El límite máximo de atraso es de 30 días después de la fecha de vencimiento; pasado este plazo el servicio web será suspendido.' :
-                      `Vence el ${new Date(currentInvoice.due_date).toLocaleDateString()}`}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className={`font-headline-sm ${currentInvoice.status === 'overdue' ? 'text-yellow-700' : 'text-primary'}`}>
-                    ${Number(currentInvoice.amount).toLocaleString('es-CL')}
-                  </p>
+                )}
+
+                <div className="border-t border-outline-variant/20 pt-4 mt-2 flex justify-between items-center">
+                  <span className="font-bold text-on-surface uppercase tracking-widest text-sm">Total a Pagar:</span>
+                  <span className="font-headline-sm text-primary">${totalToPay.toLocaleString('es-CL')}</span>
                 </div>
               </div>
             ) : (
@@ -139,18 +179,18 @@ export default function BillingManager({ user }) {
             )}
           </div>
 
-          {currentInvoice && (
+          {unpaidInvoices.length > 0 && selectedInvoiceIds.length > 0 && (
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button 
                 onClick={() => showAlert('La integración con MercadoPago estará disponible pronto.', 'info')}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#009EE3] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#008CC9] transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 bg-[#009EE3] text-white py-3 px-6 rounded-lg font-bold hover:bg-[#008CC9] transition-colors shadow-sm"
               >
                 <span className="material-symbols-outlined">payments</span>
-                Pagar con Mercado Pago
+                Pagar ${totalToPay.toLocaleString('es-CL')}
               </button>
               <button 
-                onClick={() => { setSelectedInvoice(currentInvoice); setShowTransferModal(true); }}
-                className="flex-1 flex items-center justify-center gap-2 border border-outline-variant text-primary py-3 px-6 rounded-lg font-bold hover:bg-surface-container-lowest transition-colors"
+                onClick={() => setShowTransferModal(true)}
+                className="flex-1 flex items-center justify-center gap-2 border border-outline-variant text-primary py-3 px-6 rounded-lg font-bold hover:bg-surface-container-lowest transition-colors shadow-sm"
               >
                 <span className="material-symbols-outlined">account_balance</span>
                 Reportar Transferencia
@@ -220,7 +260,7 @@ export default function BillingManager({ user }) {
             <form onSubmit={handleReportTransfer} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-widest">Monto a transferir</label>
-                <div className="font-headline-sm text-on-surface">${Number(selectedInvoice?.amount || 0).toLocaleString('es-CL')}</div>
+                <div className="font-headline-sm text-on-surface">${totalToPay.toLocaleString('es-CL')}</div>
               </div>
               
               <div>
