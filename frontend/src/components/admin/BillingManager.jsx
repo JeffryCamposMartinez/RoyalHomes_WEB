@@ -113,6 +113,7 @@ export default function BillingManager({ user }) {
             body { background-color: #fff; padding: 0; }
             .invoice-box { box-shadow: none; border-radius: 0; max-width: 100%; }
             .header { border-radius: 0; }
+            .no-print { display: none !important; }
           }
         </style>
       </head>
@@ -182,9 +183,13 @@ export default function BillingManager({ user }) {
             <p>Este documento es un comprobante válido del pago de tu suscripción de servicios web.</p>
           </div>
         </div>
-        <script>
-          window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); }
-        </script>
+        
+        <div class="no-print" style="text-align: center; margin-top: 40px;">
+          <button onclick="window.print()" style="background: #cca730; color: #fff; border: none; padding: 15px 30px; font-size: 16px; font-family: 'Outfit', sans-serif; font-weight: 600; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(204, 167, 48, 0.3); transition: all 0.2s;">
+            <svg style="width:18px; height:18px; vertical-align:middle; margin-right:8px; fill:currentColor" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+            Imprimir o Guardar PDF
+          </button>
+        </div>
       </body>
       </html>
     `);
