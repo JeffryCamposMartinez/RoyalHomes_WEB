@@ -70,6 +70,69 @@ export default function BillingManager({ user }) {
     }
   };
 
+  const handleDownloadReceipt = (invoice, payment) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Recibo de Pago - ${invoice.month_year}</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #1a1c1a; }
+            .receipt-container { max-width: 600px; margin: 0 auto; border: 1px solid #e3e2e0; padding: 40px; border-radius: 12px; }
+            .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #f3f1eb; padding-bottom: 20px; }
+            .header h1 { margin: 0; color: #1a1c1a; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+            .header p { color: #747878; margin-top: 5px; }
+            .row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #f3f1eb; padding-bottom: 10px; }
+            .label { font-weight: bold; color: #444748; font-size: 14px; text-transform: uppercase; }
+            .value { font-size: 16px; font-weight: 500; }
+            .total-row { display: flex; justify-content: space-between; margin-top: 30px; font-size: 20px; font-weight: bold; padding-top: 20px; border-top: 2px solid #1a1c1a; }
+            .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #747878; }
+            @media print {
+              body { padding: 0; }
+              .receipt-container { border: none; padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt-container">
+            <div class="header">
+              <h1>COMPROBANTE DE PAGO</h1>
+              <p>Mantenimiento Web</p>
+            </div>
+            <div class="row">
+              <span class="label">Fecha de Pago</span>
+              <span class="value">${new Date(payment.payment_date).toLocaleDateString()}</span>
+            </div>
+            <div class="row">
+              <span class="label">Método de Pago</span>
+              <span class="value" style="text-transform: capitalize;">${payment.payment_method.replace('_', ' ')}</span>
+            </div>
+            <div class="row">
+              <span class="label">Nº Transacción</span>
+              <span class="value">${payment.transaction_id || 'N/A'}</span>
+            </div>
+            <div class="row">
+              <span class="label">Mensualidad</span>
+              <span class="value">${invoice.month_year}</span>
+            </div>
+            <div class="total-row">
+              <span>TOTAL PAGADO</span>
+              <span>$${Number(invoice.amount).toLocaleString('es-CL')}</span>
+            </div>
+            <div class="footer">
+              <p>Gracias por tu preferencia.</p>
+              <p>Este comprobante es generado automáticamente y sirve como respaldo de tu pago mensual.</p>
+            </div>
+          </div>
+          <script>
+            window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   if (loading) return <div className="flex justify-center p-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>;
 
   if (!billingData?.client) {
@@ -214,6 +277,7 @@ export default function BillingManager({ user }) {
                 <th className="p-4 border-b border-outline-variant/30">Monto</th>
                 <th className="p-4 border-b border-outline-variant/30">Estado</th>
                 <th className="p-4 border-b border-outline-variant/30">Método</th>
+                <th className="p-4 border-b border-outline-variant/30 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -237,6 +301,18 @@ export default function BillingManager({ user }) {
                       </td>
                       <td className="p-4 text-on-surface-variant capitalize text-sm">
                         {payment ? payment.payment_method.replace('_', ' ') : '-'}
+                      </td>
+                      <td className="p-4 text-right">
+                        {invoice.status === 'paid' && payment && (
+                          <button 
+                            onClick={() => handleDownloadReceipt(invoice, payment)}
+                            className="inline-flex items-center justify-center gap-1 bg-surface-container-high hover:bg-outline-variant/30 text-on-surface px-3 py-1.5 rounded-md text-sm font-bold transition-colors"
+                            title="Descargar Comprobante"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">download</span>
+                            Recibo
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
