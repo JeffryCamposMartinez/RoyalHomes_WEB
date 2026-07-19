@@ -71,7 +71,7 @@ exports.receiveWebhook = async (req, res) => {
             if (existing.length === 0) {
               await billingDb.query(
                 'INSERT INTO payments (invoice_id, amount, payment_method, transaction_id, status) VALUES (?, ?, ?, ?, ?)',
-                [invId, totalAmount / invoiceIds.length, 'Mercado Pago', paymentData.id.toString(), 'completed']
+                [invId, totalAmount / invoiceIds.length, 'mercado_pago', paymentData.id.toString(), 'completed']
               );
             }
           }
