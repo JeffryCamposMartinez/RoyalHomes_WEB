@@ -255,18 +255,27 @@ export default function BillingManager({ user }) {
             </h3>
             
             {unpaidInvoices.length > 0 ? (
-              <div className={`p-4 rounded-lg border flex flex-col gap-4 ${hasOverdueSelected ? 'bg-yellow-50 border-yellow-300' : 'bg-secondary/5 border-secondary/30'}`}>
+              <div className={`p-3 md:p-4 rounded-lg border flex flex-col gap-3 md:gap-4 ${hasOverdueSelected ? 'bg-yellow-50 border-yellow-300' : 'bg-secondary/5 border-secondary/30'}`}>
                 {unpaidInvoices.map((invoice, index) => (
-                  <label key={invoice.id} className="flex items-center gap-3 cursor-pointer group hover:bg-surface-container-lowest/50 p-2 rounded transition-colors -m-2">
-                    <div className="relative flex items-center">
+                  <label key={invoice.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 cursor-pointer group hover:bg-surface-container-lowest/50 p-2 md:p-3 rounded transition-colors -m-1 md:-m-2">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                       <input 
                         type="checkbox" 
                         checked={selectedInvoiceIds.includes(invoice.id)}
                         onChange={() => handleToggleInvoice(index)}
-                        className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer transition-all"
+                        className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer transition-all shrink-0"
                       />
+                      <div className="flex-1 sm:hidden">
+                        <div className="flex items-center gap-2">
+                          {invoice.status === 'overdue' && <span className="material-symbols-outlined text-yellow-600 text-sm">warning</span>}
+                          <p className={`font-bold text-sm ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-on-surface'}`}>
+                            Mensualidad {invoice.month_year}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
+                    
+                    <div className="hidden sm:block flex-1">
                       <div className="flex items-center gap-2">
                         {invoice.status === 'overdue' && <span className="material-symbols-outlined text-yellow-600 text-sm">warning</span>}
                         <p className={`font-bold ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-on-surface'}`}>
@@ -277,8 +286,12 @@ export default function BillingManager({ user }) {
                         Vence el {new Date(invoice.due_date).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-headline-sm ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-primary'}`}>
+                    
+                    <div className="flex justify-between items-center sm:block sm:text-right pl-8 sm:pl-0">
+                      <p className={`text-xs sm:hidden ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-on-surface-variant'}`}>
+                        Vence {new Date(invoice.due_date).toLocaleDateString()}
+                      </p>
+                      <p className={`font-headline-sm text-lg sm:text-xl ${invoice.status === 'overdue' ? 'text-yellow-700' : 'text-primary'}`}>
                         ${Number(invoice.amount).toLocaleString('es-CL')}
                       </p>
                     </div>
@@ -334,13 +347,13 @@ export default function BillingManager({ user }) {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-sm uppercase tracking-widest">
-                <th className="p-4 border-b border-outline-variant/30">Mes</th>
-                <th className="p-4 border-b border-outline-variant/30">Vencimiento</th>
-                <th className="p-4 border-b border-outline-variant/30">Monto</th>
-                <th className="p-4 border-b border-outline-variant/30">Estado</th>
-                <th className="p-4 border-b border-outline-variant/30">Método</th>
-                <th className="p-4 border-b border-outline-variant/30 text-right">Acciones</th>
+              <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-xs sm:text-sm uppercase tracking-widest whitespace-nowrap">
+                <th className="p-3 sm:p-4 border-b border-outline-variant/30">Mes</th>
+                <th className="p-3 sm:p-4 border-b border-outline-variant/30">Vencimiento</th>
+                <th className="p-3 sm:p-4 border-b border-outline-variant/30">Monto</th>
+                <th className="p-3 sm:p-4 border-b border-outline-variant/30">Estado</th>
+                <th className="p-3 sm:p-4 border-b border-outline-variant/30">Método</th>
+                <th className="p-3 sm:p-4 border-b border-outline-variant/30 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -350,26 +363,26 @@ export default function BillingManager({ user }) {
                 invoices.map(invoice => {
                   const payment = payments.find(p => p.invoice_id === invoice.id);
                   return (
-                    <tr key={invoice.id} className="border-b border-outline-variant/20 hover:bg-surface-container-lowest/50 transition-colors">
-                      <td className="p-4 font-bold text-on-surface">{invoice.month_year}</td>
-                      <td className="p-4 text-on-surface-variant">{new Date(invoice.due_date).toLocaleDateString()}</td>
-                      <td className="p-4 text-on-surface font-mono">${Number(invoice.amount).toLocaleString('es-CL')}</td>
-                      <td className="p-4">
-                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest 
+                    <tr key={invoice.id} className="border-b border-outline-variant/20 hover:bg-surface-container-lowest/50 transition-colors whitespace-nowrap text-sm sm:text-base">
+                      <td className="p-3 sm:p-4 font-bold text-on-surface">{invoice.month_year}</td>
+                      <td className="p-3 sm:p-4 text-on-surface-variant">{new Date(invoice.due_date).toLocaleDateString()}</td>
+                      <td className="p-3 sm:p-4 text-on-surface font-mono">${Number(invoice.amount).toLocaleString('es-CL')}</td>
+                      <td className="p-3 sm:p-4">
+                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest whitespace-nowrap inline-block
                           ${invoice.status === 'paid' ? 'bg-success/20 text-success' : 
                             invoice.status === 'overdue' ? 'bg-error/20 text-error' : 
                             'bg-secondary/20 text-secondary'}`}>
                           {invoice.status === 'paid' ? 'Pagado' : invoice.status === 'overdue' ? 'Atrasado' : 'Próximo Pago'}
                         </span>
                       </td>
-                      <td className="p-4 text-on-surface-variant capitalize text-sm">
+                      <td className="p-3 sm:p-4 text-on-surface-variant capitalize text-sm">
                         {payment ? payment.payment_method.replace('_', ' ') : '-'}
                       </td>
-                      <td className="p-4 text-right">
+                      <td className="p-3 sm:p-4 text-right">
                         {invoice.status === 'paid' && payment && (
                           <button 
                             onClick={() => handleDownloadReceipt(invoice, payment)}
-                            className="inline-flex items-center justify-center gap-1 bg-surface-container-high hover:bg-outline-variant/30 text-on-surface px-3 py-1.5 rounded-md text-sm font-bold transition-colors"
+                            className="inline-flex items-center justify-center gap-1 bg-surface-container-high hover:bg-outline-variant/30 text-on-surface px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-bold transition-colors"
                             title="Descargar Comprobante"
                           >
                             <span className="material-symbols-outlined text-[18px]">download</span>
