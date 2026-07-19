@@ -6,7 +6,7 @@ const billingPool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: 'AgencyBilling_db', // Forzamos esta DB independiente del env DB_NAME
+  database: process.env.BILLING_DB_NAME || 'AgencyBilling_db',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
