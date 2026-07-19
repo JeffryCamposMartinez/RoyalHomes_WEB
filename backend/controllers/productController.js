@@ -1,9 +1,29 @@
 const db = require('../config/db');
 
+const getFullUrl = (url) => {
+  if (!url) return url;
+  if (url.startsWith('http')) return url;
+  const baseUrl = process.env.PUBLIC_BACKEND_URL || 'http://nk7qrdyo4oxvieqdl35lgi42.185.173.110.158.sslip.io';
+  return `${baseUrl}${url}`;
+};
+
+const formatGallery = (galleryStr) => {
+  if (!galleryStr) return [];
+  try {
+    const arr = typeof galleryStr === 'string' ? JSON.parse(galleryStr) : galleryStr;
+    return Array.isArray(arr) ? arr.map(getFullUrl) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
 exports.getAllCategories = async (req, res) => {
   try {
     const [rows] = await db.query('SELECT id, nombre as name, descripcion, imagen_url FROM categorias');
-    res.json(rows);
+    res.json(rows.map(c => ({
+      ...c,
+      imagen_url: getFullUrl(c.imagen_url)
+    })));
   } catch (error) {
     res.status(500).json({ message: 'Error getting categories' });
   }
@@ -34,10 +54,16 @@ exports.getProducts = async (req, res) => {
       
       return {
         ...p,
+        image: getFullUrl(p.image),
+        gallery: JSON.stringify(formatGallery(p.gallery)),
         inStock: p.inStock === 1,
         discount_percentage: discount,
         price_calculated: priceCalc,
-        variantes: variantes.filter(v => v.producto_id === p.id)
+        variantes: variantes.filter(v => v.producto_id === p.id).map(v => ({
+          ...v,
+          imagen_variante: getFullUrl(v.imagen_variante),
+          galeria: JSON.stringify(formatGallery(v.galeria))
+        }))
       };
     });
 
@@ -56,7 +82,10 @@ exports.getStoreLayout = async (req, res) => {
       JOIN categorias c ON cp.categoria_id = c.id
       ORDER BY cp.slot_index ASC
     `);
-    res.json(layout);
+    res.json(layout.map(l => ({
+      ...l,
+      imagen_url: getFullUrl(l.imagen_url)
+    })));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error getting store layout' });

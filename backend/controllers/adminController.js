@@ -1,5 +1,12 @@
 const db = require('../config/db');
 
+const getFullUrl = (url) => {
+  if (!url) return url;
+  if (url.startsWith('http')) return url;
+  const baseUrl = process.env.PUBLIC_BACKEND_URL || 'http://nk7qrdyo4oxvieqdl35lgi42.185.173.110.158.sslip.io';
+  return `${baseUrl}${url}`;
+};
+
 exports.getMetrics = async (req, res) => {
   try {
     const [[{ totalRevenue }]] = await db.query('SELECT SUM(total) as totalRevenue FROM pedidos');
@@ -46,6 +53,7 @@ exports.getInventory = async (req, res) => {
     
     const formattedInventory = inventory.map(item => ({
       ...item,
+      imagen_base: getFullUrl(item.imagen_base),
       price: item.precio_especifico || item.precio_base,
       status: item.stock === 0 ? 'Out of Stock' : item.stock < 10 ? 'Low Stock' : 'In Stock'
     }));

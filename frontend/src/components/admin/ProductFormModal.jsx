@@ -672,7 +672,7 @@ const VariantItem = ({ variant, onDelete, onUpdate }) => {
     <div className="bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/30 flex justify-between items-center group">
       <div className="flex items-center gap-4">
         {variant.imagen_variante && (
-          <img src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${variant.imagen_variante}`} alt={variant.sku} className="w-12 h-12 object-cover rounded-md border border-outline-variant/30" />
+          <img src={variant.imagen_variante} alt={variant.sku} className="w-12 h-12 object-cover rounded-md border border-outline-variant/30" />
         )}
         <div>
           <p className="font-label-md text-primary font-bold">{variant.material} - {variant.acabado_color}</p>

@@ -27,8 +27,6 @@ coverage/
 
 # Uploads and temporary data
 backend/uploads/
-frontend/public/uploads/
-frontend/public/Publicidad/
 
 # IDE configurations
 .idea/

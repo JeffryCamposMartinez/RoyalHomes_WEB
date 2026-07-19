@@ -23,8 +23,8 @@ app.use('/api/upload', uploadRoutes);
 
 // Servir archivos estáticos de la carpeta uploads y Publicidad
 const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, '../frontend/public/uploads')));
-app.use('/Publicidad', express.static(path.join(__dirname, '../frontend/public/Publicidad')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/Publicidad', express.static(path.join(__dirname, '../Publicidad')));
 
 app.listen(PORT, () => {
   console.log(`Backend Profesional corriendo en http://localhost:${PORT}`);

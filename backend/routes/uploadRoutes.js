@@ -3,45 +3,42 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 const db = require('../config/db');
 
-// Ensure destination directory exists
-const uploadDir = path.join(__dirname, '../../frontend/public/uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Ensure destination directories exist
+const uploadDir = path.join(__dirname, '../../uploads');
+const pubDir = path.join(__dirname, '../../Publicidad');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+if (!fs.existsSync(pubDir)) fs.mkdirSync(pubDir, { recursive: true });
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const folder = req.query.folder === 'Publicidad' ? 'Publicidad' : 'uploads';
-        const targetDir = path.join(__dirname, `../../frontend/public/${folder}`);
-        if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, { recursive: true });
-        }
-        cb(null, targetDir);
-    },
-    filename: function (req, file, cb) {
-        // Unique filename: fieldname - timestamp - random . extension
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-    }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // POST /api/upload
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
     try {
-        console.log('Upload request received:', req.file);
+        console.log('Upload request received');
         if (!req.file) {
             return res.status(400).json({ message: 'No se subió ningún archivo' });
         }
         
-        // Return the public URL path
         const folder = req.query.folder === 'Publicidad' ? 'Publicidad' : 'uploads';
-        const fileUrl = `/${folder}/${req.file.filename}`;
-        console.log('Saved file at:', req.file.path, 'URL:', fileUrl);
+        const targetDir = path.join(__dirname, `../../${folder}`);
+        
+        // Unique filename: fieldname - timestamp - random .webp
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const filename = req.file.fieldname + '-' + uniqueSuffix + '.webp';
+        const targetPath = path.join(targetDir, filename);
+
+        // Process image with sharp and save as webp
+        await sharp(req.file.buffer)
+            .webp({ quality: 80 })
+            .toFile(targetPath);
+        
+        // Return the public URL path
+        const fileUrl = `/${folder}/${filename}`;
+        console.log('Saved file at:', targetPath, 'URL:', fileUrl);
         res.status(200).json({ url: fileUrl });
     } catch (error) {
         console.error('Error uploading file:', error);
@@ -53,7 +50,7 @@ router.post('/', upload.single('image'), (req, res) => {
 router.get('/images', (req, res) => {
     try {
         const folder = req.query.folder === 'Publicidad' ? 'Publicidad' : 'uploads';
-        const targetDir = path.join(__dirname, `../../frontend/public/${folder}`);
+        const targetDir = path.join(__dirname, `../../${folder}`);
         if (!fs.existsSync(targetDir)) {
             return res.json([]);
         }
@@ -122,7 +119,7 @@ router.delete('/image', async (req, res) => {
         }
         
         const folder = req.query.folder === 'Publicidad' ? 'Publicidad' : 'uploads';
-        const targetDir = path.join(__dirname, `../../frontend/public/${folder}`);
+        const targetDir = path.join(__dirname, `../../${folder}`);
         // Extract just the filename if a full URL was passed
         const name = filename.split('/').pop();
         const filePath = path.join(targetDir, name);

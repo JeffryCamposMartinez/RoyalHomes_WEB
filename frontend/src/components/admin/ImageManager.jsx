@@ -108,7 +108,7 @@ function ImageManager({ token }) {
             return (
               <div key={idx} className="group relative aspect-square bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
                 <img 
-                  src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${imgUrl}`} 
+                  src={imgUrl} 
                   alt={filename} 
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   loading="lazy"
@@ -117,7 +117,7 @@ function ImageManager({ token }) {
                 {/* Overlay actions */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button 
-                    onClick={() => setSelectedImage(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${imgUrl}`)}
+                    onClick={() => setSelectedImage(imgUrl)}
                     className="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-lg"
                     title="Ver original"
                   >

@@ -146,7 +146,7 @@ export default function CategoryManager({ user }) {
                     <td className="py-2 md:py-4 px-0 md:px-4 pr-20 md:pr-4 overflow-hidden w-full md:w-auto block md:table-cell align-middle">
                       <div className="flex items-center gap-4 w-full">
                         {c.imagen_url ? (
-                          <img src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${c.imagen_url}`} alt={c.name || c.nombre} className="w-16 h-16 md:w-12 md:h-12 object-cover rounded-md border border-outline-variant/20 shrink-0" />
+                          <img src={c.imagen_url} alt={c.name || c.nombre} className="w-16 h-16 md:w-12 md:h-12 object-cover rounded-md border border-outline-variant/20 shrink-0" />
                         ) : (
                           <div className="w-16 h-16 md:w-12 md:h-12 bg-surface-container-high rounded-md border border-outline-variant/20 shrink-0 flex items-center justify-center text-on-surface-variant/50">
                             <span className="material-symbols-outlined text-[24px] md:text-[20px]">image</span>
