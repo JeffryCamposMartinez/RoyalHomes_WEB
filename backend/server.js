@@ -26,6 +26,20 @@ const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/Publicidad', express.static(path.join(__dirname, 'Publicidad')));
 
+// Auto-migraciones para asegurar que la estructura de la BD esté actualizada en producción
+const db = require('./config/db');
+async function runMigrations() {
+  try {
+    await db.query("ALTER TABLE productos ADD COLUMN especificaciones TEXT NULL");
+    console.log("Migración exitosa: Columna 'especificaciones' agregada.");
+  } catch (e) {
+    if (e.code !== 'ER_DUP_FIELDNAME') {
+      console.error("Error en migración:", e);
+    }
+  }
+}
+runMigrations();
+
 app.listen(PORT, () => {
   console.log(`Backend Profesional corriendo en http://localhost:${PORT}`);
 });
