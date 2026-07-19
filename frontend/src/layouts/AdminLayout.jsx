@@ -5,6 +5,7 @@ import CategoryManager from '../components/admin/CategoryManager';
 import StoreLayoutManager from '../components/admin/StoreLayoutManager';
 import ContactSettingsManager from '../components/admin/ContactSettingsManager';
 import ImageManager from '../components/admin/ImageManager';
+import BillingManager from '../components/admin/BillingManager';
 
 function AdminLayout({ user }) {
   const navigate = useNavigate();
@@ -137,6 +138,10 @@ function AdminLayout({ user }) {
           <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary transition-colors group">
             <span className="material-symbols-outlined">bar_chart</span>
             <span className="font-label-md text-label-md">Reportes</span>
+          </button>
+          <button onClick={() => { setActiveTab('billing'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'billing' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+            <span className={`material-symbols-outlined ${activeTab === 'billing' ? 'fill' : ''}`}>payments</span>
+            <span className="font-label-md text-label-md">Suscripción</span>
           </button>
         </nav>
         <div className="mt-auto">
@@ -413,6 +418,8 @@ function AdminLayout({ user }) {
           <ContactSettingsManager token={user.accessToken} />
         ) : activeTab === 'images' ? (
           <ImageManager token={user.accessToken} />
+        ) : activeTab === 'billing' ? (
+          <BillingManager user={user} />
         ) : null}
       </main>
     </div>

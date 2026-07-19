@@ -7,6 +7,7 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const billingRoutes = require('./routes/billingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +29,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/billing', billingRoutes);
 
 // Servir archivos estáticos de la carpeta uploads y Publicidad
 const path = require('path');
