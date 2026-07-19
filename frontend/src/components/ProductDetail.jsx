@@ -101,7 +101,7 @@ function ProductDetail({ product, onBack, onAddToCart }) {
           <p className="font-caption text-[10px] md:text-caption text-on-surface-variant mb-1 md:mb-4 uppercase tracking-widest">{product.category}</p>
           <h1 className="font-display-lg text-2xl md:text-display-lg text-primary mb-2 md:mb-6 leading-tight">{product.name}</h1>
           <p className="font-body-sm md:font-body-lg text-sm md:text-body-lg text-on-surface-variant mb-1 md:mb-4 leading-relaxed line-clamp-2 md:line-clamp-none">{product.description}</p>
-          {product.specifications && (
+          {(selectedVariant?.especificaciones || product.specifications) && (
             <button onClick={() => setShowSpecs(true)} className="flex items-center gap-1 text-primary text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-8 hover:opacity-80 transition-opacity">
               <span className="material-symbols-outlined text-[16px]">info</span> Ver Especificaciones
             </button>
@@ -177,8 +177,7 @@ function ProductDetail({ product, onBack, onAddToCart }) {
             </div>
             <button 
               onClick={() => onAddToCart(product, selectedVariant)}
-              disabled={!selectedVariant}
-              className={`px-5 py-3 md:px-8 md:py-4 rounded-full font-label-md text-xs md:text-label-md uppercase tracking-widest transition-all ${!selectedVariant ? 'bg-surface-container-high text-on-surface-variant opacity-50 cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90 hover:scale-105 shadow-md'}`}
+              className="px-5 py-3 md:px-8 md:py-4 rounded-full font-label-md text-xs md:text-label-md uppercase tracking-widest transition-all bg-primary text-on-primary hover:bg-primary/90 hover:scale-105 shadow-md"
             >
               Agregar al Carrito
             </button>
@@ -204,7 +203,7 @@ function ProductDetail({ product, onBack, onAddToCart }) {
               </button>
             </div>
             <div className="p-6 overflow-y-auto whitespace-pre-wrap font-body-md text-on-surface-variant leading-relaxed">
-              {product.specifications}
+              {selectedVariant?.especificaciones || product.specifications}
             </div>
           </div>
         </div>

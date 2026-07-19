@@ -113,10 +113,10 @@ exports.deleteProduct = async (req, res) => {
 
 exports.createVariant = async (req, res) => {
   try {
-    const { producto_id, material, acabado_color, sku, stock, precio_especifico, imagen_variante, galeria } = req.body;
+    const { producto_id, material, acabado_color, sku, stock, precio_especifico, imagen_variante, galeria, especificaciones } = req.body;
     const [result] = await db.query(
-      'INSERT INTO variantes_producto (producto_id, material, acabado_color, sku, stock, precio_especifico, imagen_variante, galeria) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [producto_id, material, acabado_color, sku, stock, precio_especifico, imagen_variante || null, galeria ? JSON.stringify(galeria) : null]
+      'INSERT INTO variantes_producto (producto_id, material, acabado_color, sku, stock, precio_especifico, imagen_variante, galeria, especificaciones) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [producto_id, material, acabado_color, sku, stock, precio_especifico, imagen_variante || null, galeria ? JSON.stringify(galeria) : null, especificaciones || null]
     );
     res.status(201).json({ id: result.insertId, message: 'Variante creada' });
   } catch (error) {
@@ -128,10 +128,10 @@ exports.createVariant = async (req, res) => {
 exports.updateVariant = async (req, res) => {
   try {
     const { id } = req.params;
-    const { material, acabado_color, sku, stock, precio_especifico, imagen_variante, galeria } = req.body;
+    const { material, acabado_color, sku, stock, precio_especifico, imagen_variante, galeria, especificaciones } = req.body;
     await db.query(
-      'UPDATE variantes_producto SET material = ?, acabado_color = ?, sku = ?, stock = ?, precio_especifico = ?, imagen_variante = ?, galeria = ? WHERE id = ?',
-      [material, acabado_color, sku, stock, precio_especifico, imagen_variante || null, galeria ? JSON.stringify(galeria) : null, id]
+      'UPDATE variantes_producto SET material = ?, acabado_color = ?, sku = ?, stock = ?, precio_especifico = ?, imagen_variante = ?, galeria = ?, especificaciones = ? WHERE id = ?',
+      [material, acabado_color, sku, stock, precio_especifico, imagen_variante || null, galeria ? JSON.stringify(galeria) : null, especificaciones || null, id]
     );
     res.json({ message: 'Variante actualizada' });
   } catch (error) {

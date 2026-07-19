@@ -138,7 +138,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
     setGalleryChanged(true);
   };
 
-  const [newVariant, setNewVariant] = useState({ material: '', acabado_color: '', sku: '', stock: 0, precio_especifico: '' });
+  const [newVariant, setNewVariant] = useState({ material: '', acabado_color: '', sku: '', stock: 0, precio_especifico: '', especificaciones: '' });
   const [newVariantGallery, setNewVariantGallery] = useState([]);
 
   const handleNewVariantFilesSelect = (e) => {
@@ -201,7 +201,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
       
       if (res.ok) {
         setVariants([...variants, { id: data.id, ...payload }]);
-        setNewVariant({ material: '', acabado_color: '', sku: '', stock: 0, precio_especifico: '' });
+        setNewVariant({ material: '', acabado_color: '', sku: '', stock: 0, precio_especifico: '', especificaciones: '' });
         setNewVariantGallery([]);
         onRefresh();
       } else {
@@ -428,6 +428,10 @@ export default function ProductFormModal({ product, categories, user, onClose, o
                   <input type="number" step="1" placeholder="Precio Específico ($)" value={newVariant.precio_especifico} onChange={e => setNewVariant({...newVariant, precio_especifico: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
                 </div>
                 <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-on-surface-variant uppercase tracking-widest mt-2">Especificaciones</label>
+                  <textarea placeholder="Medidas, materiales, cuidados..." rows={3} value={newVariant.especificaciones} onChange={e => setNewVariant({...newVariant, especificaciones: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary resize-y" />
+                </div>
+                <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center mt-2">
                     <label className="font-caption text-on-surface-variant uppercase tracking-widest">Galería de Variante</label>
                     <input type="file" multiple accept="image/*" onChange={handleNewVariantFilesSelect} id="var-gallery-upload" className="hidden" />
@@ -563,6 +567,7 @@ const VariantItem = ({ variant, onDelete, onUpdate }) => {
     editData.acabado_color !== variant.acabado_color ||
     editData.sku !== variant.sku ||
     String(editData.precio_especifico) !== String(variant.precio_especifico) ||
+    (editData.especificaciones || '') !== (variant.especificaciones || '') ||
     galleryChanged;
 
   const handleSave = () => {
@@ -621,6 +626,16 @@ const VariantItem = ({ variant, onDelete, onUpdate }) => {
             onChange={e => setEditData({...editData, precio_especifico: e.target.value})} 
             placeholder="Precio"
             className="flex-1 bg-surface p-2 rounded-lg border border-outline-variant outline-none focus:border-primary text-sm"
+          />
+        </div>
+        <div className="flex flex-col gap-1 mt-1">
+          <label className="text-xs text-on-surface-variant uppercase tracking-widest">Especificaciones</label>
+          <textarea 
+            rows={2}
+            value={editData.especificaciones || ''} 
+            onChange={e => setEditData({...editData, especificaciones: e.target.value})} 
+            placeholder="Medidas, materiales, cuidados..."
+            className="w-full bg-surface p-2 rounded-lg border border-outline-variant outline-none focus:border-primary text-sm resize-y"
           />
         </div>
         <div className="flex flex-col gap-2 mt-1">
