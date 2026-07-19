@@ -7,8 +7,8 @@ const sharp = require('sharp');
 const db = require('../config/db');
 
 // Ensure destination directories exist
-const uploadDir = path.join(__dirname, '../../uploads');
-const pubDir = path.join(__dirname, '../../Publicidad');
+const uploadDir = path.join(__dirname, '../uploads');
+const pubDir = path.join(__dirname, '../Publicidad');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 if (!fs.existsSync(pubDir)) fs.mkdirSync(pubDir, { recursive: true });
 
@@ -24,7 +24,7 @@ router.post('/', upload.single('image'), async (req, res) => {
         }
         
         const folder = req.query.folder === 'Publicidad' ? 'Publicidad' : 'uploads';
-        const targetDir = path.join(__dirname, `../../${folder}`);
+        const targetDir = path.join(__dirname, `../${folder}`);
         
         // Unique filename: fieldname - timestamp - random .webp
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -50,7 +50,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 router.get('/images', (req, res) => {
     try {
         const folder = req.query.folder === 'Publicidad' ? 'Publicidad' : 'uploads';
-        const targetDir = path.join(__dirname, `../../${folder}`);
+        const targetDir = path.join(__dirname, `../${folder}`);
         if (!fs.existsSync(targetDir)) {
             return res.json([]);
         }
@@ -119,8 +119,7 @@ router.delete('/image', async (req, res) => {
         }
         
         const folder = req.query.folder === 'Publicidad' ? 'Publicidad' : 'uploads';
-        const targetDir = path.join(__dirname, `../../${folder}`);
-        // Extract just the filename if a full URL was passed
+        const targetDir = path.join(__dirname, `../${folder}`);
         const name = filename.split('/').pop();
         const filePath = path.join(targetDir, name);
         const searchPath = `/${folder}/${name}`;
