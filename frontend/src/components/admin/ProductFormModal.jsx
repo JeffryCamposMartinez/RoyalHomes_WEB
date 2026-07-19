@@ -311,13 +311,13 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         </div>
 
         <div className="flex border-b border-outline-variant/30 px-2 md:px-6 overflow-x-auto no-scrollbar">
-          <button onClick={() => setActiveTab('base')} className={`py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${activeTab === 'base' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
+          <button onClick={() => setActiveTab('base')} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${activeTab === 'base' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
             Info Base
           </button>
-          <button onClick={() => setActiveTab('variants')} disabled={!productId} className={`py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${!productId ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'variants' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
+          <button onClick={() => setActiveTab('variants')} disabled={!productId} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${!productId ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'variants' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
             Variantes ({variants.length})
           </button>
-          <button onClick={() => setActiveTab('stock')} disabled={!productId || variants.length === 0} className={`py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${(!productId || variants.length === 0) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'stock' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
+          <button onClick={() => setActiveTab('stock')} disabled={!productId || variants.length === 0} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${(!productId || variants.length === 0) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'stock' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
             Stock
           </button>
         </div>
