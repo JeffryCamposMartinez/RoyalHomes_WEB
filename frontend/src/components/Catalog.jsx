@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import AdSenseBlock from './AdSenseBlock';
 
 import InfiniteCategoryCarousel from './InfiniteCategoryCarousel';
 
@@ -305,12 +306,12 @@ function Catalog({ products, categories, selectedCategory, onSelectCategory, onP
           </div>
         )}
 
-        {/* Ad Placeholder (Bottom) */}
-        <div className="w-full flex justify-center my-12 md:my-16">
-          <div className="w-full max-w-[970px] h-[90px] md:h-[250px] bg-surface border border-dashed border-outline-variant/50 rounded flex items-center justify-center opacity-60 select-none">
-            <span className="font-caption text-caption text-on-surface-variant text-center px-4">Espacio reservado para anuncio (Google Ads)</span>
+          {/* Ad Placeholder (Middle) */}
+          <div className="hidden md:flex w-full justify-center my-8 md:my-16">
+            <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[250px] bg-surface rounded flex items-center justify-center overflow-hidden">
+              <AdSenseBlock slot="8250857236" />
+            </div>
           </div>
-        </div>
       </main>
 
     </>

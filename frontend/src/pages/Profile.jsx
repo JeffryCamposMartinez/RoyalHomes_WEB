@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAlert } from '../contexts/AlertContext';
+import AdSenseBlock from '../components/AdSenseBlock';
 
 function Profile({ user, onUpdateUser }) {
   const [activeTab, setActiveTab] = useState('datos'); // 'datos', 'direcciones', 'compras'
@@ -98,12 +99,12 @@ function Profile({ user, onUpdateUser }) {
 
       </div>
 
-      {/* Ad Placeholder (Bottom) */}
-      <div className="w-full flex justify-center mt-16 mb-4">
-        <div className="w-full max-w-[970px] h-[90px] md:h-[250px] bg-surface border border-dashed border-outline-variant/50 rounded flex items-center justify-center opacity-60 select-none">
-          <span className="font-caption text-caption text-on-surface-variant text-center px-4">Espacio reservado para anuncio (Google Ads)</span>
+        {/* Ad Placeholder */}
+        <div className="hidden md:flex w-full justify-center mb-8">
+          <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[250px] bg-surface rounded flex items-center justify-center overflow-hidden">
+            <AdSenseBlock slot="8250857236" />
+          </div>
         </div>
-      </div>
     </div>
   );
 }
