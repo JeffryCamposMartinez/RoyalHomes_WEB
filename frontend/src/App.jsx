@@ -56,7 +56,7 @@ function App() {
          }
       }
 
-      fetch('http://localhost:3001/api/auth/sync-cart', {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/sync-cart`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ function App() {
 
   useEffect(() => {
     // Fetch categories
-    fetch('http://localhost:3001/api/products/categories')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/categories`)
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error('Error fetching categories:', err));
@@ -97,7 +97,7 @@ function App() {
 
   useEffect(() => {
     setLoading(true);
-    let url = 'http://localhost:3001/api/products';
+    let url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products`;
     if (selectedCategory) {
       url += `?category=${selectedCategory}`;
     }

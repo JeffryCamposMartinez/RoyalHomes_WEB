@@ -14,8 +14,8 @@ export default function ProductManager({ user }) {
     setLoading(true);
     try {
       const [prodRes, catRes] = await Promise.all([
-        fetch('http://localhost:3001/api/products'),
-        fetch('http://localhost:3001/api/products/categories')
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products`),
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/categories`)
       ]);
       setProducts(await prodRes.json());
       setCategories(await catRes.json());
@@ -35,7 +35,7 @@ export default function ProductManager({ user }) {
     if (!isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/products/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/products/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${user.accessToken}` }
       });

@@ -13,8 +13,8 @@ function Profile({ user, onUpdateUser }) {
     const fetchData = async () => {
       try {
         const [profileRes, ordersRes] = await Promise.all([
-          fetch('http://localhost:3001/api/auth/profile', { headers: { 'Authorization': `Bearer ${user.accessToken}` } }),
-          fetch('http://localhost:3001/api/orders/my-orders', { headers: { 'Authorization': `Bearer ${user.accessToken}` } })
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/profile`, { headers: { 'Authorization': `Bearer ${user.accessToken}` } }),
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/my-orders`, { headers: { 'Authorization': `Bearer ${user.accessToken}` } })
         ]);
         
         if (profileRes.ok) setProfileData(await profileRes.json());
@@ -184,7 +184,7 @@ function MisDatos({ profile, setProfile, user, onUpdateUser, showAlert }) {
     
     setSaving(true);
     try {
-      const res = await fetch('http://localhost:3001/api/auth/profile', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
         body: JSON.stringify(formData)
@@ -337,7 +337,7 @@ function MisDirecciones({ profile, setProfile, user, showAlert }) {
   const saveAddresses = async (newAddresses) => {
     setSaving(true);
     try {
-      const res = await fetch('http://localhost:3001/api/auth/addresses', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/addresses`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
         body: JSON.stringify({ direcciones: newAddresses })
@@ -527,7 +527,7 @@ function MisCompras({ orders }) {
                   {order.items?.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-surface-variant/30 rounded overflow-hidden flex-shrink-0">
-                        {item.imagen_principal && <img src={item.imagen_principal.startsWith('http') ? item.imagen_principal : `http://localhost:3001${item.imagen_principal}`} alt={item.nombre} className="w-full h-full object-cover" />}
+                        {item.imagen_principal && <img src={item.imagen_principal.startsWith('http') ? item.imagen_principal : `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${item.imagen_principal}`} alt={item.nombre} className="w-full h-full object-cover" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-primary truncate">{item.nombre}</p>

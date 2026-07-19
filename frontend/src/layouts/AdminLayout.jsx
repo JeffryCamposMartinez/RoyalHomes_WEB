@@ -27,9 +27,9 @@ function AdminLayout({ user }) {
         const headers = { 'Authorization': `Bearer ${token}` };
 
         const [metricsRes, staffRes, inventoryRes] = await Promise.all([
-          fetch('http://localhost:3001/api/admin/metrics', { headers }),
-          fetch('http://localhost:3001/api/admin/staff', { headers }),
-          fetch('http://localhost:3001/api/admin/inventory', { headers })
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/metrics`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/staff`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/inventory`, { headers })
         ]);
 
         if (metricsRes.status === 403 || metricsRes.status === 401) {

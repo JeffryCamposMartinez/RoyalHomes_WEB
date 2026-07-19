@@ -64,7 +64,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         const formData = new FormData();
         formData.append('image', item.file);
         try {
-          const uploadRes = await fetch('http://localhost:3001/api/upload', {
+          const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/upload`, {
             method: 'POST',
             body: formData
           });
@@ -86,7 +86,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
 
     const payload = { nombre, descripcion, precio_base: precioBase, imagen_base: imagenBase, galeria: galeriaUrls, categoria_id: categoriaId };
     try {
-      const url = isEdit ? `http://localhost:3001/api/admin/products/${productId}` : 'http://localhost:3001/api/admin/products';
+      const url = isEdit ? `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/products/${productId}` : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/products`;
       const method = isEdit ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -113,7 +113,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
 
   const getImageUrl = (url) => {
     if (!url) return '';
-    return url.startsWith('http') || url.startsWith('blob:') ? url : `http://localhost:3001${url}`;
+    return url.startsWith('http') || url.startsWith('blob:') ? url : `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${url}`;
   };
 
   const handleFilesSelect = (e) => {
@@ -170,7 +170,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         } else if (item.type === 'new') {
           const formData = new FormData();
           formData.append('image', item.file);
-          const uploadRes = await fetch('http://localhost:3001/api/upload', { method: 'POST', body: formData });
+          const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/upload`, { method: 'POST', body: formData });
           if (uploadRes.ok) {
             const uploadData = await uploadRes.json();
             finalUrls.push(uploadData.url);
@@ -189,7 +189,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         galeria: finalUrls.slice(1)
       };
 
-      const res = await fetch('http://localhost:3001/api/admin/variants', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/variants`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
         body: JSON.stringify(payload)
@@ -214,7 +214,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
     const isConfirmed = await showConfirm('¿Seguro que deseas eliminar esta variante?');
     if (!isConfirmed) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/variants/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/variants/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${user.accessToken}` }
       });
@@ -233,7 +233,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         ...variant,
         stock: parseInt(newStock) || 0
       };
-      const res = await fetch(`http://localhost:3001/api/admin/variants/${variant.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/variants/${variant.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
         body: JSON.stringify(payload)
@@ -263,7 +263,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         } else if (item.type === 'new') {
           const formData = new FormData();
           formData.append('image', item.file);
-          const uploadRes = await fetch('http://localhost:3001/api/upload', { method: 'POST', body: formData });
+          const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/upload`, { method: 'POST', body: formData });
           if (uploadRes.ok) {
             const uploadData = await uploadRes.json();
             finalUrls.push(uploadData.url);
@@ -279,7 +279,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         galeria: finalUrls.slice(1)
       };
 
-      const res = await fetch(`http://localhost:3001/api/admin/variants/${variantId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/variants/${variantId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
         body: JSON.stringify(payload)
@@ -531,7 +531,7 @@ const VariantItem = ({ variant, onDelete, onUpdate }) => {
   
   const getImageUrl = (url) => {
     if (!url) return '';
-    return url.startsWith('http') || url.startsWith('blob:') ? url : `http://localhost:3001${url}`;
+    return url.startsWith('http') || url.startsWith('blob:') ? url : `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${url}`;
   };
 
   const initialGallery = [];
@@ -672,7 +672,7 @@ const VariantItem = ({ variant, onDelete, onUpdate }) => {
     <div className="bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/30 flex justify-between items-center group">
       <div className="flex items-center gap-4">
         {variant.imagen_variante && (
-          <img src={`http://localhost:3001${variant.imagen_variante}`} alt={variant.sku} className="w-12 h-12 object-cover rounded-md border border-outline-variant/30" />
+          <img src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${variant.imagen_variante}`} alt={variant.sku} className="w-12 h-12 object-cover rounded-md border border-outline-variant/30" />
         )}
         <div>
           <p className="font-label-md text-primary font-bold">{variant.material} - {variant.acabado_color}</p>

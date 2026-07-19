@@ -11,12 +11,12 @@ function Catalog({ products, categories, selectedCategory, onSelectCategory, onP
   const [heroText, setHeroText] = useState('Elevando tus espacios a través de la esencia del diseño Japandi. Combinamos el minimalismo funcional escandinavo con la elegancia atemporal japonesa.');
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/products/layout')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/layout`)
       .then(res => res.json())
       .then(data => setLayoutCategories(data))
       .catch(err => console.error('Error fetching layout:', err));
       
-    fetch('http://localhost:3001/api/products/hero')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/hero`)
       .then(res => res.json())
       .then(data => {
         if (data && data.hero_text) {
@@ -82,7 +82,7 @@ function Catalog({ products, categories, selectedCategory, onSelectCategory, onP
                     <div className="w-full aspect-[16/9] relative rounded-xl overflow-hidden shadow-lg bg-surface-container-high">
                       {cat.imagen_url ? (
                         <img 
-                          src={`http://localhost:3001${cat.imagen_url}`} 
+                          src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${cat.imagen_url}`} 
                           alt={cat.name} 
                           className="w-full h-full object-cover" 
                         />
@@ -134,7 +134,7 @@ function Catalog({ products, categories, selectedCategory, onSelectCategory, onP
                       <div className={`w-full ${aspectClass} overflow-hidden rounded-xl bg-surface-container-high transition-shadow group-hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] relative`}>
                         {cat.imagen_url ? (
                           <img 
-                            src={`http://localhost:3001${cat.imagen_url}`} 
+                            src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${cat.imagen_url}`} 
                             alt={cat.name} 
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" 
                           />

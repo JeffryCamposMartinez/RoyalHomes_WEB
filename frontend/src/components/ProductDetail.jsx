@@ -9,7 +9,7 @@ function ProductDetail({ product, onBack, onAddToCart }) {
   
   const getImageUrl = (url) => {
     if (!url) return '';
-    return url.startsWith('http') ? url : `http://localhost:3001${url}`;
+    return url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${url}`;
   };
 
   const allImages = [];

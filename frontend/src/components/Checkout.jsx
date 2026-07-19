@@ -31,7 +31,7 @@ function Checkout({ cart, clearCart }) {
         return;
       }
       try {
-        const res = await fetch('http://localhost:3001/api/auth/profile', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -60,7 +60,7 @@ function Checkout({ cart, clearCart }) {
       const token = getToken();
       const newAddress = { id: Date.now(), ...formData };
       const newAddresses = [...(profile?.direcciones || []), newAddress];
-      const res = await fetch('http://localhost:3001/api/auth/addresses', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/addresses`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ direcciones: newAddresses })
@@ -91,7 +91,7 @@ function Checkout({ cart, clearCart }) {
     setProcessing(true);
     try {
       const token = getToken();
-      const res = await fetch('http://localhost:3001/api/orders/create', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/create`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

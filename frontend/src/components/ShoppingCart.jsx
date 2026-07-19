@@ -9,7 +9,7 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
     if (!url) return '';
     if (url.startsWith('http')) return url;
     if (url.startsWith('/uploads')) return url; // Servido por frontend localmente (Vite)
-    return `http://localhost:3001${url}`;
+    return `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${url}`;
   };
 
   const getCalculatedPrice = (basePrice, discount) => {

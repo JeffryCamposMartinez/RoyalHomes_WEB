@@ -165,7 +165,7 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105 pointer-events-none">
                   {cat.imagen_url || cat.image ? (
                     <img 
-                      src={`http://localhost:3001${cat.imagen_url || cat.image}`} 
+                      src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${cat.imagen_url || cat.image}`} 
                       alt={cat.name} 
                       className="w-full h-full object-cover pointer-events-none"
                     />

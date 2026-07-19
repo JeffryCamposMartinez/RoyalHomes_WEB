@@ -9,7 +9,7 @@ function Footer() {
   useEffect(() => {
     const fetchContact = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/products/contact');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/contact`);
         if (res.ok) {
           const data = await res.json();
           setContactInfo(data);
@@ -19,7 +19,7 @@ function Footer() {
       }
       
       try {
-        const resHero = await fetch('http://localhost:3001/api/products/hero');
+        const resHero = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/hero`);
         if (resHero.ok) {
           const heroData = await resHero.json();
           if (heroData && heroData.footer_text) {

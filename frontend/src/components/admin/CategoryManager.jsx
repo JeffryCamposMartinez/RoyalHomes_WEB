@@ -18,7 +18,7 @@ export default function CategoryManager({ user }) {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/products/categories');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/categories`);
       setCategories(await res.json());
     } catch (err) {
       console.error(err);
@@ -45,7 +45,7 @@ export default function CategoryManager({ user }) {
     if (!isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/api/admin/categories/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/categories/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${user.accessToken}` }
       });
@@ -71,7 +71,7 @@ export default function CategoryManager({ user }) {
       if (imageFile) {
         const formData = new FormData();
         formData.append('image', imageFile);
-        const uploadRes = await fetch('http://localhost:3001/api/upload', {
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/upload`, {
           method: 'POST',
           body: formData
         });
@@ -86,8 +86,8 @@ export default function CategoryManager({ user }) {
 
       const isEdit = !!selectedCategory;
       const url = isEdit 
-        ? `http://localhost:3001/api/admin/categories/${selectedCategory.id}` 
-        : `http://localhost:3001/api/admin/categories`;
+        ? `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/categories/${selectedCategory.id}` 
+        : `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/admin/categories`;
         
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
@@ -146,7 +146,7 @@ export default function CategoryManager({ user }) {
                     <td className="py-2 md:py-4 px-0 md:px-4 pr-20 md:pr-4 overflow-hidden w-full md:w-auto block md:table-cell align-middle">
                       <div className="flex items-center gap-4 w-full">
                         {c.imagen_url ? (
-                          <img src={`http://localhost:3001${c.imagen_url}`} alt={c.name || c.nombre} className="w-16 h-16 md:w-12 md:h-12 object-cover rounded-md border border-outline-variant/20 shrink-0" />
+                          <img src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${c.imagen_url}`} alt={c.name || c.nombre} className="w-16 h-16 md:w-12 md:h-12 object-cover rounded-md border border-outline-variant/20 shrink-0" />
                         ) : (
                           <div className="w-16 h-16 md:w-12 md:h-12 bg-surface-container-high rounded-md border border-outline-variant/20 shrink-0 flex items-center justify-center text-on-surface-variant/50">
                             <span className="material-symbols-outlined text-[24px] md:text-[20px]">image</span>
@@ -226,7 +226,7 @@ export default function CategoryManager({ user }) {
                   <div className="flex flex-col gap-3">
                     {(imageFile || imagenUrl) && (
                       <img 
-                        src={imageFile ? URL.createObjectURL(imageFile) : `http://localhost:3001${imagenUrl}`} 
+                        src={imageFile ? URL.createObjectURL(imageFile) : `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${imagenUrl}`} 
                         alt="Preview" 
                         className="w-full h-40 object-cover rounded-lg border border-outline-variant/30"
                       />

@@ -29,11 +29,11 @@ export default function StoreLayoutManager({ user }) {
       setLoading(true);
       try {
         const [catsRes, layoutRes, heroRes] = await Promise.all([
-          fetch('http://localhost:3001/api/products/categories'),
-          fetch('http://localhost:3001/api/admin/layout', {
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/categories`),
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/layout`, {
             headers: { 'Authorization': `Bearer ${user.accessToken}` }
           }),
-          fetch('http://localhost:3001/api/products/hero')
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/hero`)
         ]);
         const catsData = await catsRes.json();
         const layoutData = await layoutRes.json();
@@ -71,7 +71,7 @@ export default function StoreLayoutManager({ user }) {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/upload/images?folder=${imageFolder}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/upload/images?folder=${imageFolder}`);
         const data = await res.json();
         setImages(data);
       } catch (err) {
@@ -105,7 +105,7 @@ export default function StoreLayoutManager({ user }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('http://localhost:3001/api/admin/layout', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/layout`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ export default function StoreLayoutManager({ user }) {
         })))
       });
       
-      const resHero = await fetch('http://localhost:3001/api/admin/hero', {
+      const resHero = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/hero`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export default function StoreLayoutManager({ user }) {
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData();
         formData.append('image', file);
-        const res = await fetch(`http://localhost:3001/api/upload?folder=${imageFolder}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}/api/upload?folder=${imageFolder}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${user.accessToken}`
@@ -268,7 +268,7 @@ export default function StoreLayoutManager({ user }) {
                     >
                       {displayImage ? (
                         <>
-                          <img src={`http://localhost:3001${displayImage}`} className={`w-full h-full object-cover transition-opacity ${isPreviewing ? 'opacity-50' : 'opacity-90'}`} />
+                          <img src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${displayImage}`} className={`w-full h-full object-cover transition-opacity ${isPreviewing ? 'opacity-50' : 'opacity-90'}`} />
                           <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-1 pointer-events-none">
                             <span className="text-white font-label-md font-bold text-center text-[8px] md:text-sm leading-tight">{selectedCat ? (selectedCat.name || selectedCat.nombre) : 'Sin Enlace'}</span>
                           </div>
@@ -435,7 +435,7 @@ export default function StoreLayoutManager({ user }) {
                   }}
                   className={`w-28 lg:w-full shrink-0 aspect-square bg-surface rounded-xl border overflow-hidden transition-all cursor-pointer cursor-grab active:cursor-grabbing snap-start relative ${selectedImage === imgUrl ? 'border-primary shadow-md opacity-90 scale-[0.95] ring-2 ring-primary ring-offset-2' : 'border-outline-variant/30 hover:border-primary/50 hover:shadow-sm'}`}
                 >
-                  <img src={`http://localhost:3001${imgUrl}`} className="w-full h-full object-cover pointer-events-none" loading="lazy" />
+                  <img src={`${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${imgUrl}`} className="w-full h-full object-cover pointer-events-none" loading="lazy" />
                   {selectedImage === imgUrl && (
                     <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                       <div className="bg-primary text-on-primary rounded-full p-1 shadow-lg">
