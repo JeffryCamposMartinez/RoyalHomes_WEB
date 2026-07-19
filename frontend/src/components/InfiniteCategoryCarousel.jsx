@@ -146,7 +146,7 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
             const moved = Math.abs(scrollContainerRef.current.scrollLeft - scrollLeftPos);
             if (moved < 10) onSelectCategory(null); 
           }}
-          className="relative flex-none w-[120px] h-[120px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group cursor-pointer mr-3 md:mr-4 shrink-0 flex items-center justify-center bg-white shadow-sm hover:shadow-md transition-shadow"
+          className="relative flex-none w-[60px] h-[120px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group cursor-pointer mr-3 md:mr-4 shrink-0 flex items-center justify-center bg-white shadow-sm hover:shadow-md transition-shadow"
         >
           <div className={`absolute inset-0 border-[3px] transition-colors pointer-events-none ${!selectedCategory ? 'border-primary' : 'border-transparent'}`}></div>
           <h3 className="text-primary font-display-lg text-lg md:text-3xl font-light tracking-wide pointer-events-none transition-transform duration-700 group-hover:scale-110">
