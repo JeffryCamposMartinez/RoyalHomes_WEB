@@ -14,6 +14,8 @@ function AdminLayout({ user }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [isSiteOpen, setIsSiteOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,26 +89,46 @@ function AdminLayout({ user }) {
             <span className={`material-symbols-outlined ${activeTab === 'dashboard' ? 'fill' : ''}`}>dashboard</span>
             <span className="font-label-md text-label-md">Dashboard</span>
           </button>
-          <button onClick={() => { setActiveTab('products'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'products' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
-            <span className={`material-symbols-outlined ${activeTab === 'products' ? 'fill' : ''}`}>inventory_2</span>
-            <span className="font-label-md text-label-md">Productos</span>
-          </button>
-          <button onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'categories' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
-            <span className={`material-symbols-outlined ${activeTab === 'categories' ? 'fill' : ''}`}>category</span>
-            <span className="font-label-md text-label-md">Categorías</span>
-          </button>
-          <button onClick={() => { setActiveTab('store_layout'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'store_layout' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
-            <span className={`material-symbols-outlined ${activeTab === 'store_layout' ? 'fill' : ''}`}>web</span>
-            <span className="font-label-md text-label-md">Diseño Inicio</span>
-          </button>
-          <button onClick={() => { setActiveTab('contact_settings'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'contact_settings' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
-            <span className={`material-symbols-outlined ${activeTab === 'contact_settings' ? 'fill' : ''}`}>contact_page</span>
-            <span className="font-label-md text-label-md">Redes y Contacto</span>
-          </button>
-          <button onClick={() => { setActiveTab('images'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'images' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
-            <span className={`material-symbols-outlined ${activeTab === 'images' ? 'fill' : ''}`}>perm_media</span>
-            <span className="font-label-md text-label-md">Multimedia</span>
-          </button>
+          {/* Catálogo Sub-menu */}
+          <div>
+            <button onClick={() => setIsCatalogOpen(!isCatalogOpen)} className={`w-full flex items-center justify-between px-4 py-3 rounded-lg font-bold group transition-colors ${(activeTab === 'products' || activeTab === 'categories') && !isCatalogOpen ? 'text-primary bg-surface-container-lowest' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+              <div className="flex items-center gap-3">
+                <span className={`material-symbols-outlined ${(activeTab === 'products' || activeTab === 'categories') ? 'fill' : ''}`}>inventory_2</span>
+                <span className="font-label-md text-label-md">Catálogo</span>
+              </div>
+              <span className="material-symbols-outlined transition-transform duration-200" style={{ transform: isCatalogOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
+            </button>
+            <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ${isCatalogOpen ? 'max-h-40 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}>
+              <button onClick={() => { setActiveTab('products'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'products' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+                <span className="font-label-md text-sm">Productos</span>
+              </button>
+              <button onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'categories' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+                <span className="font-label-md text-sm">Categorías</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Sitio Web Sub-menu */}
+          <div>
+            <button onClick={() => setIsSiteOpen(!isSiteOpen)} className={`w-full flex items-center justify-between px-4 py-3 rounded-lg font-bold group transition-colors ${(activeTab === 'store_layout' || activeTab === 'contact_settings' || activeTab === 'images') && !isSiteOpen ? 'text-primary bg-surface-container-lowest' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+              <div className="flex items-center gap-3">
+                <span className={`material-symbols-outlined ${(activeTab === 'store_layout' || activeTab === 'contact_settings' || activeTab === 'images') ? 'fill' : ''}`}>web</span>
+                <span className="font-label-md text-label-md">Sitio Web</span>
+              </div>
+              <span className="material-symbols-outlined transition-transform duration-200" style={{ transform: isSiteOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
+            </button>
+            <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ${isSiteOpen ? 'max-h-60 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}>
+              <button onClick={() => { setActiveTab('store_layout'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'store_layout' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+                <span className="font-label-md text-sm">Diseño Inicio</span>
+              </button>
+              <button onClick={() => { setActiveTab('contact_settings'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'contact_settings' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+                <span className="font-label-md text-sm">Redes y Contacto</span>
+              </button>
+              <button onClick={() => { setActiveTab('images'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'images' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+                <span className="font-label-md text-sm">Multimedia</span>
+              </button>
+            </div>
+          </div>
           <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary transition-colors group">
             <span className="material-symbols-outlined">group</span>
             <span className="font-label-md text-label-md">Usuarios</span>
