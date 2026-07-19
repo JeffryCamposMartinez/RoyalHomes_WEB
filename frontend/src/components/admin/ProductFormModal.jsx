@@ -2,6 +2,20 @@ import React, { useState } from 'react';
 import { useAlert } from '../../contexts/AlertContext';
 import { Reorder } from 'framer-motion';
 
+export const generateRandomSku = () => 'SKU-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+const checkSkuUnique = async (sku, currentId = null) => {
+  try {
+    let url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/check-sku?sku=${sku}`;
+    if (currentId) url += `&currentId=${currentId}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.unique;
+  } catch (err) {
+    return true; // Fallback
+  }
+};
+
 export default function ProductFormModal({ product, categories, user, onClose, onRefresh }) {
   const { showAlert, showConfirm } = useAlert();
   const [activeTab, setActiveTab] = useState('base'); // 'base' | 'variants'
@@ -161,6 +175,9 @@ export default function ProductFormModal({ product, categories, user, onClose, o
   const handleAddVariant = async () => {
     if (!productId) return showAlert('Guarda el producto base primero', 'error');
     if (!newVariant.material || !newVariant.acabado_color || !newVariant.sku) return showAlert('Material, Color y SKU son requeridos', 'error');
+    
+    const isUnique = await checkSkuUnique(newVariant.sku);
+    if (!isUnique) return showAlert('El SKU ya está en uso. Por favor ingresa o genera uno único.', 'error');
     
     try {
       const finalUrls = [];
@@ -421,7 +438,12 @@ export default function ProductFormModal({ product, categories, user, onClose, o
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input placeholder="Material (Ej. Roble)" value={newVariant.material} onChange={e => setNewVariant({...newVariant, material: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
                   <input placeholder="Color (Ej. Natural)" value={newVariant.acabado_color} onChange={e => setNewVariant({...newVariant, acabado_color: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
-                  <input placeholder="SKU Único" value={newVariant.sku} onChange={e => setNewVariant({...newVariant, sku: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
+                  <div className="flex gap-2 w-full">
+                    <input placeholder="SKU Único" value={newVariant.sku} onChange={e => setNewVariant({...newVariant, sku: e.target.value})} className="flex-1 bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
+                    <button type="button" onClick={() => setNewVariant({...newVariant, sku: generateRandomSku()})} className="bg-surface-variant p-3 rounded-lg text-on-surface-variant hover:bg-primary/20 transition-colors" title="Generar SKU Automático">
+                      <span className="material-symbols-outlined text-[20px]">autorenew</span>
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input type="number" placeholder="Stock Inicial" value={newVariant.stock} onChange={e => setNewVariant({...newVariant, stock: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
@@ -570,7 +592,11 @@ const VariantItem = ({ variant, onDelete, onUpdate }) => {
     (editData.especificaciones || '') !== (variant.especificaciones || '') ||
     galleryChanged;
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (editData.sku !== variant.sku) {
+      const isUnique = await checkSkuUnique(editData.sku, variant.id);
+      if (!isUnique) return alert('El SKU ya está en uso. Por favor ingresa o genera uno único.');
+    }
     onUpdate(variant.id, editData, editGallery);
     setIsEditing(false);
     setGalleryChanged(false);
@@ -613,12 +639,17 @@ const VariantItem = ({ variant, onDelete, onUpdate }) => {
           />
         </div>
         <div className="flex flex-col md:flex-row gap-2">
-          <input 
-            value={editData.sku} 
-            onChange={e => setEditData({...editData, sku: e.target.value})} 
-            placeholder="SKU"
-            className="flex-1 bg-surface p-2 rounded-lg border border-outline-variant outline-none focus:border-primary text-sm"
-          />
+          <div className="flex flex-1 gap-1">
+            <input 
+              value={editData.sku} 
+              onChange={e => setEditData({...editData, sku: e.target.value})} 
+              placeholder="SKU"
+              className="flex-1 bg-surface p-2 rounded-lg border border-outline-variant outline-none focus:border-primary text-sm min-w-0"
+            />
+            <button type="button" onClick={() => setEditData({...editData, sku: generateRandomSku()})} className="bg-surface-variant px-2 rounded-lg text-on-surface-variant hover:bg-primary/20 transition-colors" title="Generar SKU Automático">
+              <span className="material-symbols-outlined text-[16px]">autorenew</span>
+            </button>
+          </div>
           <input 
             type="number"
             step="1"
