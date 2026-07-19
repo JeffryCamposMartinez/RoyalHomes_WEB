@@ -18,8 +18,10 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
       isDraggingRef.current = false;
     };
     window.addEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener('touchend', handleGlobalMouseUp);
     return () => {
       window.removeEventListener('mouseup', handleGlobalMouseUp);
+      window.removeEventListener('touchend', handleGlobalMouseUp);
     };
   }, []);
 
@@ -113,6 +115,20 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
     isHovered.current = true;
   };
 
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    isDraggingRef.current = true;
+    setStartX(e.touches[0].pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeftPos(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5; // Scroll-fast
+    scrollContainerRef.current.scrollLeft = scrollLeftPos - walk;
+  };
+
   return (
     <div className="relative w-full overflow-hidden mb-12" id="catalog-grid">
       <h2 className="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg font-light mb-8 text-primary text-center">
@@ -126,8 +142,11 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
       <div className="flex px-4 -mx-4 md:px-0 md:mx-0 max-w-full">
         
         <div 
-          onClick={(e) => { if(!isDragging) onSelectCategory(null); }}
-          className="relative flex-none w-[110px] h-[140px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group cursor-pointer mr-3 md:mr-4 shrink-0 flex items-center justify-center bg-white shadow-sm hover:shadow-md transition-shadow"
+          onClick={(e) => { 
+            const moved = Math.abs(scrollContainerRef.current.scrollLeft - scrollLeftPos);
+            if (moved < 10) onSelectCategory(null); 
+          }}
+          className="relative flex-none w-[120px] h-[120px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group cursor-pointer mr-3 md:mr-4 shrink-0 flex items-center justify-center bg-white shadow-sm hover:shadow-md transition-shadow"
         >
           <div className={`absolute inset-0 border-[3px] transition-colors pointer-events-none ${!selectedCategory ? 'border-primary' : 'border-transparent'}`}></div>
           <h3 className="text-primary font-display-lg text-lg md:text-3xl font-light tracking-wide pointer-events-none transition-transform duration-700 group-hover:scale-110">
@@ -138,11 +157,13 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
         {/* Scrolling Carousel */}
         <div 
           ref={scrollContainerRef}
-          className={`flex overflow-x-hidden gap-3 md:gap-4 pb-6 flex-1 cursor-grab ${isDragging ? 'cursor-grabbing select-none' : ''}`}
+          className={`flex overflow-x-hidden gap-3 md:gap-4 pb-6 flex-1 cursor-grab touch-pan-y ${isDragging ? 'cursor-grabbing select-none' : ''}`}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           style={{ scrollBehavior: 'auto' }}
         >
           {duplicatedItems.map((cat, index) => {
@@ -151,7 +172,7 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
                 key={`${cat.id}-${index}`}
                 onClick={(e) => { 
                   // If dragged more than 10 pixels, ignore the click
-                  const moved = Math.abs((e.pageX - scrollContainerRef.current.offsetLeft) - startX);
+                  const moved = Math.abs(scrollContainerRef.current.scrollLeft - scrollLeftPos);
                   if (moved < 10) {
                     onSelectCategory(cat.id);
                   }
@@ -160,7 +181,11 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
                   setIsDragging(false);
                   isDraggingRef.current = false;
                 }}
-                className="relative flex-none shrink-0 min-w-[110px] w-[110px] h-[140px] md:min-w-[240px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group pointer-events-auto"
+                onTouchEnd={(e) => {
+                  setIsDragging(false);
+                  isDraggingRef.current = false;
+                }}
+                className="relative flex-none shrink-0 min-w-[120px] w-[120px] h-[120px] md:min-w-[240px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group pointer-events-auto"
               >
                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105 pointer-events-none">
                   {cat.imagen_url || cat.image ? (
