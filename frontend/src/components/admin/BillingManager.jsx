@@ -73,61 +73,119 @@ export default function BillingManager({ user }) {
   const handleDownloadReceipt = (invoice, payment) => {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
+      <!DOCTYPE html>
       <html>
-        <head>
-          <title>Recibo de Pago - ${invoice.month_year}</title>
-          <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #1a1c1a; }
-            .receipt-container { max-width: 600px; margin: 0 auto; border: 1px solid #e3e2e0; padding: 40px; border-radius: 12px; }
-            .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #f3f1eb; padding-bottom: 20px; }
-            .header h1 { margin: 0; color: #1a1c1a; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-            .header p { color: #747878; margin-top: 5px; }
-            .row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #f3f1eb; padding-bottom: 10px; }
-            .label { font-weight: bold; color: #444748; font-size: 14px; text-transform: uppercase; }
-            .value { font-size: 16px; font-weight: 500; }
-            .total-row { display: flex; justify-content: space-between; margin-top: 30px; font-size: 20px; font-weight: bold; padding-top: 20px; border-top: 2px solid #1a1c1a; }
-            .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #747878; }
-            @media print {
-              body { padding: 0; }
-              .receipt-container { border: none; padding: 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt-container">
-            <div class="header">
-              <h1>COMPROBANTE DE PAGO</h1>
-              <p>Mantenimiento Web</p>
-            </div>
-            <div class="row">
-              <span class="label">Fecha de Pago</span>
-              <span class="value">${new Date(payment.payment_date).toLocaleDateString()}</span>
-            </div>
-            <div class="row">
-              <span class="label">Método de Pago</span>
-              <span class="value" style="text-transform: capitalize;">${payment.payment_method.replace('_', ' ')}</span>
-            </div>
-            <div class="row">
-              <span class="label">Nº Transacción</span>
-              <span class="value">${payment.transaction_id || 'N/A'}</span>
-            </div>
-            <div class="row">
-              <span class="label">Mensualidad</span>
-              <span class="value">${invoice.month_year}</span>
-            </div>
-            <div class="total-row">
-              <span>TOTAL PAGADO</span>
-              <span>$${Number(invoice.amount).toLocaleString('es-CL')}</span>
-            </div>
-            <div class="footer">
-              <p>Gracias por tu preferencia.</p>
-              <p>Este comprobante es generado automáticamente y sirve como respaldo de tu pago mensual.</p>
+      <head>
+        <meta charset="utf-8">
+        <title>Recibo - ${invoice.month_year}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+        <style>
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+          body { font-family: 'Outfit', sans-serif; background-color: #f4f6f8; margin: 0; padding: 40px; color: #1a1c1a; }
+          .invoice-box { max-width: 800px; margin: auto; background: #ffffff; padding: 0; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); overflow: hidden; position: relative; }
+          .header { background: linear-gradient(135deg, #1a1c1a 0%, #333 100%); color: #fff; padding: 40px; display: flex; justify-content: space-between; align-items: center; }
+          .header-logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+          .header-logo span { color: #cca730; }
+          .header-title { text-align: right; }
+          .header-title h1 { margin: 0; font-size: 36px; text-transform: uppercase; letter-spacing: 4px; color: #fff; opacity: 0.9; }
+          .header-title p { margin: 5px 0 0; font-size: 14px; opacity: 0.7; font-weight: 300; }
+          .content { padding: 50px 40px; position: relative; z-index: 1; }
+          .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 120px; font-weight: 800; color: rgba(16, 185, 129, 0.03); z-index: 0; pointer-events: none; text-transform: uppercase; letter-spacing: 10px; white-space: nowrap; }
+          .info-section { display: flex; justify-content: space-between; margin-bottom: 40px; position: relative; z-index: 1; }
+          .info-block { width: 45%; }
+          .info-block h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #858383; }
+          .info-block p { margin: 4px 0; font-size: 15px; font-weight: 400; color: #1a1c1a; }
+          .info-block p strong { font-weight: 600; }
+          .stamp { position: absolute; right: 40px; top: 120px; border: 4px solid #10b981; color: #10b981; font-size: 24px; font-weight: 800; padding: 10px 20px; text-transform: uppercase; border-radius: 8px; transform: rotate(15deg); opacity: 0.8; letter-spacing: 4px; pointer-events: none; }
+          .table-container { margin-bottom: 40px; position: relative; z-index: 1; }
+          table { width: 100%; border-collapse: collapse; }
+          th { background: #f9fafb; padding: 15px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #444748; border-bottom: 2px solid #e3e2e0; }
+          td { padding: 20px 15px; border-bottom: 1px solid #f3f1eb; font-size: 15px; color: #1a1c1a; }
+          .amount-col { text-align: right; }
+          .totals { width: 350px; margin-left: auto; position: relative; z-index: 1; }
+          .totals-row { display: flex; justify-content: space-between; padding: 12px 20px; font-size: 15px; }
+          .totals-row.grand-total { background: #1a1c1a; color: #ffffff; border-radius: 12px; font-size: 20px; font-weight: 700; margin-top: 10px; padding: 20px; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+          .totals-row.grand-total span:last-child { color: #cca730; }
+          .footer { background: #f9fafb; padding: 30px 40px; text-align: center; border-top: 1px solid #e3e2e0; }
+          .footer p { margin: 5px 0; font-size: 13px; color: #747878; }
+          .footer strong { color: #1a1c1a; }
+          @media print {
+            body { background-color: #fff; padding: 0; }
+            .invoice-box { box-shadow: none; border-radius: 0; max-width: 100%; }
+            .header { border-radius: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-box">
+          <div class="header">
+            <div class="header-logo">ROYAL<span>HOMES</span></div>
+            <div class="header-title">
+              <h1>RECIBO</h1>
+              <p>Comprobante Oficial de Pago</p>
             </div>
           </div>
-          <script>
-            window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); }
-          </script>
-        </body>
+          
+          <div class="content">
+            <div class="watermark">PAGADO</div>
+            <div class="stamp">PAGADO</div>
+
+            <div class="info-section">
+              <div class="info-block">
+                <h3>Facturado a:</h3>
+                <p><strong>${client.name || 'Cliente'}</strong></p>
+                <p>${client.store_domain}</p>
+                <p>${client.email || ''}</p>
+              </div>
+              <div class="info-block" style="text-align: right;">
+                <h3>Detalles del Recibo:</h3>
+                <p><strong>Recibo Nº:</strong> #INV-${invoice.id.toString().padStart(6, '0')}</p>
+                <p><strong>Fecha de Pago:</strong> ${new Date(payment.payment_date).toLocaleDateString()}</p>
+                <p><strong>Método:</strong> ${payment.payment_method.toUpperCase()}</p>
+                <p><strong>Transacción:</strong> ${payment.transaction_id || 'N/A'}</p>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Descripción del Servicio</th>
+                    <th>Periodo</th>
+                    <th class="amount-col">Importe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Mantenimiento y Hosting Web</strong><br><span style="font-size:13px; color:#747878;">Plan: ${subscription.plan_name}</span></td>
+                    <td>Mensualidad ${invoice.month_year}</td>
+                    <td class="amount-col">$${Number(invoice.amount).toLocaleString('es-CL')}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="totals">
+              <div class="totals-row">
+                <span>Subtotal</span>
+                <span>$${Number(invoice.amount).toLocaleString('es-CL')}</span>
+              </div>
+              <div class="totals-row grand-total">
+                <span>TOTAL PAGADO</span>
+                <span>$${Number(invoice.amount).toLocaleString('es-CL')}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p><strong>¡Gracias por confiar en nosotros!</strong></p>
+            <p>Este documento es un comprobante válido del pago de tu suscripción de servicios web.</p>
+          </div>
+        </div>
+        <script>
+          window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); }
+        </script>
+      </body>
       </html>
     `);
     printWindow.document.close();
