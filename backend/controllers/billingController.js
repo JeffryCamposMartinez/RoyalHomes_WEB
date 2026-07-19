@@ -34,6 +34,7 @@ exports.createPreference = async (req, res) => {
              failure: `${frontendUrl}/admin?payment=failure`,
              pending: `${frontendUrl}/admin?payment=pending`
          },
+         auto_return: 'approved',
          notification_url: `${backendUrl}/api/billing/webhook/mercadopago`
      };
 
