@@ -1,0 +1,44 @@
+[
+  {
+    "slot_index": 1,
+    "id": 4,
+    "name": "Iluminación",
+    "imagen_url": "/uploads/image-1784304659818-44879123.jpg",
+    "descuento_porcentaje": 25
+  },
+  {
+    "slot_index": 2,
+    "id": 1,
+    "name": "Mesas y juegos de comedor",
+    "imagen_url": "/uploads/image-1784309001864-766822589.jfif",
+    "descuento_porcentaje": 35
+  },
+  {
+    "slot_index": 3,
+    "id": 6,
+    "name": "Menaje comedor",
+    "imagen_url": "/uploads/image-1784304670849-133079628.avif",
+    "descuento_porcentaje": 0
+  },
+  {
+    "slot_index": 4,
+    "id": 4,
+    "name": "Iluminación",
+    "imagen_url": "/uploads/image-1784304659818-44879123.jpg",
+    "descuento_porcentaje": 0
+  },
+  {
+    "slot_index": 5,
+    "id": 5,
+    "name": "Decoración hogar",
+    "imagen_url": "/uploads/image-1784304665811-989497659.jfif",
+    "descuento_porcentaje": 0
+  },
+  {
+    "slot_index": 6,
+    "id": 6,
+    "name": "Menaje comedor",
+    "imagen_url": "/uploads/image-1784304670849-133079628.avif",
+    "descuento_porcentaje": 0
+  }
+]

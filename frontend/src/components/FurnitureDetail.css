@@ -1,0 +1,138 @@
+.detail-view {
+  padding: 2rem;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 2rem;
+  transition: var(--transition);
+}
+
+.back-btn:hover {
+  color: var(--text-main);
+}
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: flex-start;
+}
+
+.detail-image-section {
+  position: sticky;
+  top: 100px;
+}
+
+.detail-image {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  aspect-ratio: 4/3;
+  box-shadow: var(--shadow-md);
+}
+
+.detail-info-section {
+  padding-top: 1rem;
+}
+
+.detail-category {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.detail-title {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0.5rem 0 1rem;
+  letter-spacing: -0.02em;
+}
+
+.detail-price {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.detail-description {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+
+.detail-specs {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 0;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.spec-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+}
+
+.spec-label {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.materials-list {
+  list-style: inside;
+  color: var(--text-muted);
+}
+
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stock-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.in-stock { color: #10B981; }
+.out-of-stock { color: #EF4444; }
+
+.add-to-cart-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+}
+
+.add-to-cart-btn:disabled {
+  background-color: var(--border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .detail-image-section {
+    position: relative;
+    top: 0;
+  }
+}

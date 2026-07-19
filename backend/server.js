@@ -1,0 +1,31 @@
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(express.json());
+
+// Rutas desacopladas (Clean Architecture)
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/upload', uploadRoutes);
+
+// Servir archivos estáticos de la carpeta uploads y Publicidad
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../frontend/public/uploads')));
+app.use('/Publicidad', express.static(path.join(__dirname, '../frontend/public/Publicidad')));
+
+app.listen(PORT, () => {
+  console.log(`Backend Profesional corriendo en http://localhost:${PORT}`);
+});
