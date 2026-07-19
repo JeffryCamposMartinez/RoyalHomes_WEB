@@ -108,7 +108,17 @@ function ProductDetail({ product, onBack, onAddToCart }) {
           )}
           
           <div className="mb-3 md:mb-10">
-            <h3 className="font-label-md text-xs md:text-label-md text-primary uppercase tracking-widest mb-2 md:mb-4">Seleccionar Variante</h3>
+            <div className="flex justify-between items-center mb-2 md:mb-4">
+              <h3 className="font-label-md text-xs md:text-label-md text-primary uppercase tracking-widest">Seleccionar Variante</h3>
+              {selectedVariant && (
+                <button 
+                  onClick={() => { setSelectedVariant(null); setCurrentImageIndex(0); }}
+                  className="text-[10px] md:text-xs font-bold text-on-surface-variant hover:text-error transition-colors uppercase tracking-widest flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">close</span> Quitar Selección
+                </button>
+              )}
+            </div>
             <div className="flex overflow-x-auto md:grid md:grid-cols-2 gap-2 md:gap-4 pb-2 md:pb-0" style={{ scrollbarWidth: 'none' }}>
               {product.variantes && product.variantes.map(v => (
                 <button 
