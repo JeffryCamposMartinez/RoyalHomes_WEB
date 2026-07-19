@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const billingController = require('../controllers/billingController');
-const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+const { verifyToken, isAdmin } = require('../middleware/auth');
 
 // Get billing dashboard data (requires admin login to store)
 router.get('/', verifyToken, isAdmin, billingController.getBillingDashboard);
