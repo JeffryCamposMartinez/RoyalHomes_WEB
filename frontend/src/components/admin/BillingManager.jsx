@@ -106,7 +106,9 @@ export default function BillingManager({ user }) {
         {/* Estado de Cuenta */}
         <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 shadow-sm col-span-1 lg:col-span-2 flex flex-col justify-between">
           <div>
-            <h3 className="font-label-lg text-primary uppercase tracking-widest mb-6">Estado de Cuenta</h3>
+            <h3 className="font-label-lg text-primary uppercase tracking-widest mb-6">
+              {currentInvoice?.status === 'overdue' ? 'Pago Atrasado' : currentInvoice ? 'Próximo Pago' : 'Estado de Cuenta'}
+            </h3>
             {currentInvoice ? (
               <div className={`p-4 rounded-lg border flex flex-col sm:flex-row justify-between items-center gap-4 ${currentInvoice.status === 'overdue' ? 'bg-error/5 border-error/30' : 'bg-secondary/5 border-secondary/30'}`}>
                 <div>
@@ -182,7 +184,7 @@ export default function BillingManager({ user }) {
                           ${invoice.status === 'paid' ? 'bg-success/20 text-success' : 
                             invoice.status === 'overdue' ? 'bg-error/20 text-error' : 
                             'bg-secondary/20 text-secondary'}`}>
-                          {invoice.status === 'paid' ? 'Pagado' : invoice.status === 'overdue' ? 'Atrasado' : 'Pendiente'}
+                          {invoice.status === 'paid' ? 'Pagado' : invoice.status === 'overdue' ? 'Atrasado' : 'Próximo Pago'}
                         </span>
                       </td>
                       <td className="p-4 text-on-surface-variant capitalize text-sm">
