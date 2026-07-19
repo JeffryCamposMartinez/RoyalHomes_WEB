@@ -142,10 +142,7 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
       <div className="flex px-4 -mx-4 md:px-0 md:mx-0 max-w-full">
         
         <div 
-          onClick={(e) => { 
-            const moved = Math.abs(scrollContainerRef.current.scrollLeft - scrollLeftPos);
-            if (moved < 10) onSelectCategory(null); 
-          }}
+          onClick={() => onSelectCategory(null)}
           className="relative flex-none w-[60px] h-[120px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group cursor-pointer mr-3 md:mr-4 shrink-0 flex items-center justify-center bg-white shadow-sm hover:shadow-md transition-shadow"
         >
           <div className={`absolute inset-0 border-[3px] transition-colors pointer-events-none ${!selectedCategory ? 'border-primary' : 'border-transparent'}`}></div>
