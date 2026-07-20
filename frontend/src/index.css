@@ -11,6 +11,9 @@
   }
 }
 
+body, html {
+  overflow-x: hidden;
+}
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

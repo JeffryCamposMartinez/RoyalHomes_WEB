@@ -136,10 +136,10 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
       </h2>
       
       {/* 
-        We use negative margins on mobile so it can bleed to the edges, 
-        and flex wrapper to put the static 'Todos' next to the infinite carousel 
+        We use w-screen to let the carousel bleed to the right edge of the screen,
+        and add left padding to align 'Todos' with the main container content.
       */}
-      <div className="flex px-4 -mx-4 md:px-0 md:mx-0 max-w-full">
+      <div className="w-screen relative left-1/2 -translate-x-1/2 pl-container-margin-mobile md:pl-container-margin-desktop flex">
         
         <div 
           onClick={() => onSelectCategory(null)}
