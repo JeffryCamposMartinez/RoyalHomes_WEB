@@ -42,7 +42,7 @@ exports.createPreference = async (req, res) => {
      res.json({ id: result.id, init_point: result.init_point });
   } catch (err) {
      console.error('Error creating MP preference:', err);
-     res.status(500).json({ error: 'Error al crear la preferencia de pago' });
+     res.status(500).json({ error: err.message || 'Error al crear la preferencia de pago' });
   }
 };
 
