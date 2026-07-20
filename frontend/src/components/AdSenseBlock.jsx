@@ -11,7 +11,10 @@ export default function AdSenseBlock({
   useEffect(() => {
     try {
       if (adRef.current && !adRef.current.getAttribute('data-ad-status')) {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        // Prevent "No slot size for availableWidth=0" error by checking if it's visible
+        if (adRef.current.offsetWidth > 0 || adRef.current.clientWidth > 0) {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
       }
     } catch (err) {
       console.error('Error loading AdSense:', err);
