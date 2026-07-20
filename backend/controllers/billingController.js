@@ -16,8 +16,8 @@ exports.createPreference = async (req, res) => {
      const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
      const preference = new Preference(client);
 
-     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-     const backendUrl = process.env.PUBLIC_BACKEND_URL || "http://localhost:3001";
+     const frontendUrl = process.env.FRONTEND_URL || "https://royalhomes.cl";
+     const backendUrl = process.env.PUBLIC_BACKEND_URL || "https://api.royalhomes.cl";
 
      const body = {
          items: [
