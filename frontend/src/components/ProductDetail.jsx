@@ -106,9 +106,9 @@ function ProductDetail({ product, onBack, onAddToCart }) {
           <p className={`font-body-sm md:font-body-lg text-sm md:text-body-lg text-on-surface-variant mb-1 md:mb-4 leading-relaxed ${isDescriptionExpanded ? '' : 'line-clamp-2'} md:line-clamp-none`}>{product.description}</p>
           <button 
             onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)} 
-            className="md:hidden text-primary font-label-md text-[10px] uppercase tracking-widest mb-3"
+            className="md:hidden block text-primary font-label-md font-bold text-xs uppercase tracking-widest mb-4 text-left hover:opacity-80 transition-opacity"
           >
-            {isDescriptionExpanded ? 'Mostrar menos' : 'Mostrar más'}
+            {isDescriptionExpanded ? 'Mostrar menos' : '+ Mostrar más'}
           </button>
           {(selectedVariant?.especificaciones || product.specifications) && (
             <button onClick={() => setShowSpecs(true)} className="flex items-center gap-1 text-primary text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-8 hover:opacity-80 transition-opacity">
