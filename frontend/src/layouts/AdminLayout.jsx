@@ -166,8 +166,8 @@ function AdminLayout({ user }) {
       {/* Main Content Canvas */}
       <main className="flex-1 px-container-margin-mobile md:px-container-margin-desktop py-6 md:py-10 overflow-y-auto w-full relative">
         
-        {/* Top Right User Menu for Desktop */}
-        <div className="hidden md:flex absolute top-6 right-8 justify-end items-center gap-1 sm:gap-4 z-50">
+        {/* Top Right User Menu */}
+        <div className="flex justify-end items-center mb-6 md:mb-8 z-50">
           <div 
             className="relative flex items-center gap-1 sm:gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" 
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
