@@ -58,9 +58,9 @@ function AdminLayout({ user }) {
   }
 
   return (
-    <div className="bg-background text-on-surface font-body-lg min-h-screen flex flex-col md:flex-row antialiased w-full">
+    <div className="bg-background text-on-surface font-body-lg h-[100dvh] flex flex-col md:flex-row antialiased w-full overflow-hidden">
       {/* Mobile Top App Bar */}
-      <header className="md:hidden fixed top-0 w-full z-40 bg-surface/70 backdrop-blur-xl flex justify-between items-center px-container-margin-mobile h-16 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
+      <header className="md:hidden shrink-0 w-full z-40 bg-surface/70 backdrop-blur-xl flex justify-between items-center px-container-margin-mobile h-16 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-on-surface-variant hover:opacity-80 transition-opacity p-2">
           <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
         </button>
@@ -163,20 +163,8 @@ function AdminLayout({ user }) {
         </div>
       </aside>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-4 py-3 bg-surface/95 backdrop-blur-xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)] md:hidden border-t border-outline-variant/30">
-        <button onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center justify-center transition-colors ${activeTab === 'dashboard' ? 'text-primary' : 'text-on-surface-variant opacity-70'}`}>
-          <span className={`material-symbols-outlined text-[24px] ${activeTab === 'dashboard' ? 'fill' : ''}`}>dashboard</span>
-          <span className="font-label-md text-[10px] uppercase tracking-widest mt-1">Inicio</span>
-        </button>
-        <Link to="/" className="flex flex-col items-center justify-center transition-colors text-on-surface-variant opacity-70">
-          <span className="material-symbols-outlined text-[24px]">storefront</span>
-          <span className="font-label-md text-[10px] uppercase tracking-widest mt-1">Tienda</span>
-        </Link>
-      </nav>
-
       {/* Main Content Canvas */}
-      <main className="flex-1 px-container-margin-mobile md:px-container-margin-desktop pt-24 pb-28 md:pt-10 md:pb-16 overflow-y-auto w-full relative">
+      <main className="flex-1 px-container-margin-mobile md:px-container-margin-desktop py-6 md:py-10 overflow-y-auto w-full relative">
         
         {/* Top Right User Menu for Desktop */}
         <div className="hidden md:flex absolute top-6 right-8 justify-end items-center gap-1 sm:gap-4 z-50">
@@ -422,6 +410,18 @@ function AdminLayout({ user }) {
           <BillingManager user={user} />
         ) : null}
       </main>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden shrink-0 w-full z-40 flex justify-around items-center px-4 py-3 bg-surface/95 backdrop-blur-xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)] border-t border-outline-variant/30">
+        <button onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center justify-center transition-colors ${activeTab === 'dashboard' ? 'text-primary' : 'text-on-surface-variant opacity-70'}`}>
+          <span className={`material-symbols-outlined text-[24px] ${activeTab === 'dashboard' ? 'fill' : ''}`}>dashboard</span>
+          <span className="font-label-md text-[10px] uppercase tracking-widest mt-1">Inicio</span>
+        </button>
+        <Link to="/" className="flex flex-col items-center justify-center transition-colors text-on-surface-variant opacity-70">
+          <span className="material-symbols-outlined text-[24px]">storefront</span>
+          <span className="font-label-md text-[10px] uppercase tracking-widest mt-1">Tienda</span>
+        </Link>
+      </nav>
     </div>
   );
 }
