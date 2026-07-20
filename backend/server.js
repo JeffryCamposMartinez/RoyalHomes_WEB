@@ -52,7 +52,6 @@ async function runMigrations() {
   } catch (e) {
     if (e.code !== 'ER_DUP_FIELDNAME') console.error("Error en migración variantes:", e);
   }
-  }
 }
 runMigrations();
 
