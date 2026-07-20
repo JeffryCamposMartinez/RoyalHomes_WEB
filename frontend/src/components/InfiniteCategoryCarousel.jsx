@@ -130,16 +130,18 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
   };
 
   return (
-    <div className="relative w-full overflow-hidden mb-12" id="catalog-grid">
+    <div className="relative w-full mb-12" id="catalog-grid">
       <h2 className="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg font-light mb-8 text-primary text-center">
         Nuestras Categorías
       </h2>
       
       {/* 
-        We use w-screen to let the carousel bleed to the right edge of the screen,
-        and add left padding to align 'Todos' with the main container content.
+        We use a calculated negative right margin to let the carousel bleed exactly to the right edge of the screen,
+        while keeping the left side perfectly aligned with the main container.
       */}
-      <div className="w-screen relative left-1/2 -translate-x-1/2 pl-container-margin-mobile md:pl-container-margin-desktop flex">
+      <div 
+        className="flex max-w-full -mr-[calc(50vw-50%+20px)] md:-mr-[calc(50vw-50%+80px)]"
+      >
         
         <div 
           onClick={() => onSelectCategory(null)}
