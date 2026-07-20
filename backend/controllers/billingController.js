@@ -106,9 +106,14 @@ exports.getBillingDashboard = async (req, res) => {
       const price = subscription.price;
       const now = new Date();
       
-      // Desde el mes de inicio hasta el mes actual
+      // Desde el mes de inicio hasta el mes correspondiente
       let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
       const endDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      // Si el día actual es mayor al día de facturación, le adelantamos la factura del próximo mes
+      if (now.getDate() > billingDay) {
+          endDate.setMonth(endDate.getMonth() + 1);
+      }
       
       while (currentDate <= endDate) {
           const yyyy = currentDate.getFullYear();
