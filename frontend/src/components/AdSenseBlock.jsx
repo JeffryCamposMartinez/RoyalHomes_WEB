@@ -2,17 +2,19 @@ import React, { useEffect, useRef } from 'react';
 
 export default function AdSenseBlock({ 
   slot = '8250857236', 
-  format = 'auto', 
+  format = 'horizontal', 
   responsive = 'true', 
-  style = { display: 'block', width: '100%', minHeight: '90px' } 
+  style = { display: 'block', width: '100%', minHeight: '90px' },
+  className = ''
 }) {
   const adRef = useRef(null);
 
   useEffect(() => {
     try {
       if (adRef.current && !adRef.current.getAttribute('data-ad-status')) {
-        // Prevent "No slot size for availableWidth=0" error by checking if it's visible
-        if (adRef.current.offsetWidth > 0 || adRef.current.clientWidth > 0) {
+        // Double check it has physical width before pushing
+        const width = adRef.current.offsetWidth || adRef.current.parentElement.offsetWidth;
+        if (width > 0) {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         }
       }
@@ -22,14 +24,16 @@ export default function AdSenseBlock({
   }, []);
 
   return (
-    <ins 
-      ref={adRef}
-      className="adsbygoogle"
-      style={style}
-      data-ad-client="ca-pub-2952671334472955"
-      data-ad-slot={slot}
-      data-ad-format={format}
-      data-full-width-responsive={responsive}
-    />
+    <div style={{ width: '100%', display: 'block', overflow: 'hidden' }} className={className}>
+      <ins 
+        ref={adRef}
+        className="adsbygoogle"
+        style={style}
+        data-ad-client="ca-pub-2952671334472955"
+        data-ad-slot={slot}
+        data-ad-format={format}
+        data-full-width-responsive={responsive}
+      />
+    </div>
   );
 }
