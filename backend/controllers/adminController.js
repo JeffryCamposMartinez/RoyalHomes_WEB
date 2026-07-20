@@ -74,7 +74,15 @@ exports.createProduct = async (req, res) => {
       'INSERT INTO productos (nombre, descripcion, especificaciones, precio_base, imagen_base, galeria, categoria_id, activo) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
       [nombre, descripcion, especificaciones || null, precio_base, imagen_base, galeria ? JSON.stringify(galeria) : null, categoria_id]
     );
-    res.status(201).json({ id: result.insertId, message: 'Producto creado' });
+    
+    // Crear variante por defecto para que se pueda vender inmediatamente sin configurar variantes manualmente
+    const defaultSku = 'SKU-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    await db.query(
+      'INSERT INTO variantes_producto (producto_id, material, acabado_color, sku, stock, precio_especifico) VALUES (?, ?, ?, ?, ?, ?)',
+      [result.insertId, 'Estándar', 'Único', defaultSku, 1, precio_base]
+    );
+
+    res.status(201).json({ id: result.insertId, message: 'Producto creado con variante por defecto' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error al crear producto' });
