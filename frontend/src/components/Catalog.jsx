@@ -185,8 +185,8 @@ function Catalog({ products, categories, selectedCategory, onSelectCategory, onP
 
         {/* Ad Placeholder (Top) */}
         <div className="w-full flex justify-center my-8 md:my-12">
-          <div className="w-full max-w-[970px] h-[90px] md:h-[120px] bg-surface-container border border-dashed border-outline-variant/50 rounded flex items-center justify-center opacity-40 select-none">
-            <span className="font-caption text-caption text-on-surface-variant text-center px-4">Espacio reservado para anuncio (Google Ads)</span>
+          <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[120px] rounded flex items-center justify-center overflow-hidden">
+            <AdSenseBlock slot="8250857236" />
           </div>
         </div>
 
