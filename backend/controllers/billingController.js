@@ -103,7 +103,7 @@ exports.getBillingDashboard = async (req, res) => {
     if (subscription && subscription.status === 'active') {
       const startDate = new Date(subscription.start_date);
       const billingDay = startDate.getDate();
-      const price = subscription.price;
+      const price = subscription.monthly_fee;
       const now = new Date();
       
       // Desde el mes de inicio hasta el mes correspondiente
