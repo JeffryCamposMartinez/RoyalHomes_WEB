@@ -4,6 +4,7 @@ import AdSenseBlock from './AdSenseBlock';
 function ProductDetail({ product, onBack, onAddToCart }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variantes?.[0] || null);
   const [showSpecs, setShowSpecs] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -102,7 +103,13 @@ function ProductDetail({ product, onBack, onAddToCart }) {
         <div className="flex-1 flex flex-col justify-start md:justify-center">
           <p className="font-caption text-[10px] md:text-caption text-on-surface-variant mb-1 md:mb-4 uppercase tracking-widest">{product.category}</p>
           <h1 className="font-display-lg text-2xl md:text-display-lg text-primary mb-2 md:mb-6 leading-tight">{product.name}</h1>
-          <p className="font-body-sm md:font-body-lg text-sm md:text-body-lg text-on-surface-variant mb-1 md:mb-4 leading-relaxed line-clamp-2 md:line-clamp-none">{product.description}</p>
+          <p className={`font-body-sm md:font-body-lg text-sm md:text-body-lg text-on-surface-variant mb-1 md:mb-4 leading-relaxed ${isDescriptionExpanded ? '' : 'line-clamp-2'} md:line-clamp-none`}>{product.description}</p>
+          <button 
+            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)} 
+            className="md:hidden text-primary font-label-md text-[10px] uppercase tracking-widest mb-3"
+          >
+            {isDescriptionExpanded ? 'Mostrar menos' : 'Mostrar más'}
+          </button>
           {(selectedVariant?.especificaciones || product.specifications) && (
             <button onClick={() => setShowSpecs(true)} className="flex items-center gap-1 text-primary text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-8 hover:opacity-80 transition-opacity">
               <span className="material-symbols-outlined text-[16px]">info</span> Ver Especificaciones
