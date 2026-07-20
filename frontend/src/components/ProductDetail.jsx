@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import AdSenseBlock from './AdSenseBlock';
 
 function ProductDetail({ product, onBack, onAddToCart }) {
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(product?.variantes?.[0] || null);
   const [showSpecs, setShowSpecs] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+    setSelectedVariant(product?.variantes?.[0] || null);
   }, [product?.id]);
   
   const getImageUrl = (url) => {
@@ -113,23 +114,7 @@ function ProductDetail({ product, onBack, onAddToCart }) {
               <h3 className="font-label-md text-xs md:text-label-md text-primary uppercase tracking-widest">Seleccionar Variante</h3>
             </div>
             <div className="flex overflow-x-auto md:grid md:grid-cols-2 gap-2 md:gap-4 pb-2 md:pb-0" style={{ scrollbarWidth: 'none' }}>
-              <button 
-                onClick={() => { setSelectedVariant(null); setCurrentImageIndex(0); }}
-                className={`p-2 md:p-4 border rounded-lg md:rounded-xl flex flex-col text-left shrink-0 min-w-[130px] md:min-w-0 transition-colors ${selectedVariant === null ? 'border-primary bg-primary text-on-primary' : 'border-outline-variant hover:border-primary bg-surface'}`}
-              >
-                <span className="font-label-md text-xs md:text-label-md mb-0.5 md:mb-1 uppercase">Diseño Base</span>
-                <span className="font-caption text-[10px] md:text-caption opacity-80">Estándar</span>
-                <div className="mt-1 md:mt-2">
-                  {discount > 0 ? (
-                    <div className="flex items-center gap-1 md:gap-2 flex-wrap">
-                      <span className="font-body-sm text-[10px] md:text-sm line-through opacity-70">${Number(product.price).toLocaleString('es-CL')}</span>
-                      <span className="font-body-md text-sm md:text-base font-bold">${Number(getCalculatedPrice(product.price)).toLocaleString('es-CL')}</span>
-                    </div>
-                  ) : (
-                    <span className="font-body-md text-sm md:text-base">${Number(product.price).toLocaleString('es-CL')}</span>
-                  )}
-                </div>
-              </button>
+
               {product.variantes && product.variantes.map(v => (
                 <button 
                   key={v.id}
