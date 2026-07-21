@@ -29,6 +29,57 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    const admin = require('../firebaseAdmin');
+    
+    // Verify Firebase token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { email, name, picture, uid } = decodedToken;
+    
+    // Check if user exists in MySQL
+    let [users] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    let user = users[0];
+    
+    if (!user) {
+      // Create new user (Role 2: Cliente)
+      const randomPassword = Math.random().toString(36).slice(-10);
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(randomPassword, salt);
+      
+      const names = name ? name.split(' ') : ['Usuario'];
+      const firstName = names[0];
+      const lastName = names.length > 1 ? names.slice(1).join(' ') : '';
+      
+      const [result] = await db.query(
+        'INSERT INTO usuarios (rol_id, nombre, apellido, email, password_hash) VALUES (2, ?, ?, ?, ?)',
+        [firstName, lastName, email, hash]
+      );
+      
+      [users] = await db.query('SELECT * FROM usuarios WHERE id = ?', [result.insertId]);
+      user = users[0];
+    }
+    
+    // Generate JWT
+    const token = jwt.sign({ id: user.id, rol_id: user.rol_id }, process.env.JWT_SECRET || 'secretkey', { expiresIn: 86400 });
+    
+    let cart = [];
+    if (user.carrito) {
+      try {
+        cart = typeof user.carrito === 'string' ? JSON.parse(user.carrito) : user.carrito;
+      } catch (e) {
+        console.error('Error parsing cart from DB', e);
+      }
+    }
+    
+    res.status(200).json({ id: user.id, nombre: user.nombre, email: user.email, rol_id: user.rol_id, accessToken: token, cart });
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({ message: 'Error authenticating with Google' });
+  }
+};
+
 exports.syncCart = async (req, res) => {
   try {
     const { cart } = req.body;

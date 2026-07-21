@@ -4,6 +4,7 @@ const authController = require('../controllers/authController');
 const { verifyToken } = require('../middleware/auth');
 
 router.post('/login', authController.login);
+router.post('/google', authController.googleLogin);
 router.post('/register', authController.register);
 router.put('/sync-cart', verifyToken, authController.syncCart);
 router.get('/profile', verifyToken, authController.getProfile);

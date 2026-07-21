@@ -1,12 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAlert } from '../contexts/AlertContext';
+import { auth, googleProvider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 function Register() {
   const [formData, setFormData] = useState({ nombre: '', apellido: '', email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { showAlert } = useAlert();
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        sessionStorage.setItem('user', JSON.stringify(data));
+        if (data.rol_id === 1) navigate('/admin');
+        else navigate('/');
+      } else {
+        showAlert(data.message || 'Error con Google Sign-In', 'error');
+        setError(data.message || 'Error con Google Sign-In');
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert('Autenticación con Google cancelada o fallida.', 'error');
+      setError('Autenticación con Google cancelada o fallida.');
+    }
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -83,8 +113,25 @@ function Register() {
           </button>
         </form>
 
+        <div className="mt-6 flex flex-col items-center">
+          <div className="w-full flex items-center gap-4 mb-6">
+            <div className="flex-1 h-px bg-outline-variant"></div>
+            <span className="font-label-md text-on-surface-variant uppercase tracking-widest text-xs">O continuar con</span>
+            <div className="flex-1 h-px bg-outline-variant"></div>
+          </div>
+          
+          <button 
+            onClick={handleGoogleLogin} 
+            type="button" 
+            className="w-full py-4 bg-surface flex items-center justify-center gap-3 border border-outline-variant hover:bg-surface-variant/50 transition-colors rounded-lg font-label-md text-label-md text-on-surface uppercase tracking-widest"
+          >
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+            Google
+          </button>
+        </div>
+
         <p className="mt-8 text-center font-body-md text-on-surface-variant">
-          ¿Ya tienes cuenta? <Link to="/login" className="text-primary font-medium hover:opacity-70 transition-opacity">Iniciar Sesión</Link>
+          ¿Ya tienes cuenta? <Link to="/login" className="text-primary font-medium hover:opacity-70 transition-opacity">Iniciar sesión</Link>
         </p>
       </div>
     </div>
