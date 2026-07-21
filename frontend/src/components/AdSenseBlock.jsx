@@ -2,9 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 export default function AdSenseBlock({ 
   slot = '8250857236', 
-  format = 'horizontal', 
   responsive = 'true', 
-  style = { display: 'block', width: '100%', minHeight: '90px' },
   className = ''
 }) {
   const adRef = useRef(null);
@@ -27,11 +25,10 @@ export default function AdSenseBlock({
     <div style={{ width: '100%', display: 'block', overflow: 'hidden' }} className={className}>
       <ins 
         ref={adRef}
-        className="adsbygoogle"
-        style={style}
+        className="adsbygoogle h-[100px] md:h-[250px]"
+        style={{ display: 'block', width: '100%' }}
         data-ad-client="ca-pub-2952671334472955"
         data-ad-slot={slot}
-        data-ad-format={format}
         data-full-width-responsive={responsive}
       />
     </div>
