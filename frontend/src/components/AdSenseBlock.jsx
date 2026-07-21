@@ -22,14 +22,13 @@ export default function AdSenseBlock({
   }, []);
 
   return (
-    <div style={{ width: '100%', display: 'block', overflow: 'hidden' }} className={className}>
+    <div style={{ width: '100%', display: 'block', overflow: 'hidden' }} className={`h-[100px] md:h-[250px] ${className}`}>
       <ins 
         ref={adRef}
-        className="adsbygoogle h-[100px] md:h-[250px]"
+        className="adsbygoogle !h-[100px] md:!h-[250px]"
         style={{ display: 'block', width: '100%' }}
         data-ad-client="ca-pub-2952671334472955"
         data-ad-slot={slot}
-        data-full-width-responsive={responsive}
       />
     </div>
   );
