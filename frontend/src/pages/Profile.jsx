@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAlert } from '../contexts/AlertContext';
 import AdSenseBlock from '../components/AdSenseBlock';
-import OrderChatModal from '../components/OrderChatModal';
+import { io } from 'socket.io-client';
 
 function Profile({ user, onUpdateUser }) {
   const [activeTab, setActiveTab] = useState('datos'); // 'datos', 'direcciones', 'compras'
@@ -469,102 +469,229 @@ function MisDirecciones({ profile, setProfile, user, showAlert }) {
   );
 }
 
-// ================= MIS COMPRAS =================
 function MisCompras({ orders, user }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOrderForChat, setSelectedOrderForChat] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef(null);
+  const { showAlert } = useAlert();
 
   const filteredOrders = orders.filter(o => 
     o.id.toString().includes(searchTerm)
   );
 
-  return (
-    <div className="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden min-h-[400px] flex flex-col">
-      <div className="flex justify-between items-center p-6 border-b border-outline-variant/30 bg-surface-container-lowest">
-        <h2 className="font-label-lg text-primary uppercase tracking-widest font-bold">Mis Compras</h2>
-      </div>
-      
-      <div className="p-4 border-b border-outline-variant/20 bg-surface flex flex-col sm:flex-row justify-between gap-4">
-        <div className="relative max-w-sm w-full">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-          <input 
-            type="text" 
-            placeholder="Número de orden de compra" 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-outline-variant text-sm focus:border-primary outline-none"
-          />
-        </div>
-        <select className="border border-outline-variant rounded-lg px-4 py-2 text-sm text-on-surface-variant bg-transparent outline-none cursor-pointer">
-          <option>Todas las compras</option>
-          <option>Entregadas</option>
-          <option>Pendientes</option>
-        </select>
-      </div>
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
+      auth: { token: user.accessToken }
+    });
 
-      <div className="flex-1 p-6 flex flex-col">
-        {filteredOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 text-center py-16">
-            <span className="material-symbols-outlined text-[64px] text-outline-variant mb-4 font-light">shopping_bag</span>
-            <h3 className="font-label-lg text-primary uppercase tracking-widest mb-1">No se encontraron resultados</h3>
-            <p className="font-body-sm text-on-surface-variant mb-6">Intenta con otro número de orden de compra</p>
-            <a href="/" className="bg-primary text-on-primary px-6 py-3 font-label-md uppercase tracking-widest hover:opacity-90 inline-block">
-              Ver productos
-            </a>
+    newSocket.on('receive_message', (msg) => {
+      setMessages(prev => [...prev, msg]);
+    });
+
+    newSocket.on('trato_actualizado', (pedido) => {
+      if (selectedOrder && selectedOrder.id === pedido.id) {
+        setSelectedOrder(prev => ({ ...prev, ...pedido }));
+      }
+      showAlert('El estado del trato ha sido actualizado', 'info');
+    });
+
+    newSocket.on('trato_cerrado_completado', () => {
+      showAlert('¡El trato se ha cerrado y el pago está habilitado!', 'success');
+      setTimeout(() => window.location.reload(), 2000);
+    });
+
+    setSocket(newSocket);
+    return () => newSocket.disconnect();
+  }, [user.accessToken, showAlert, selectedOrder]);
+
+  const handleSelectOrder = async (order) => {
+    setSelectedOrder(order);
+    if (socket) {
+      socket.emit('join_order_room', order.id);
+    }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/${order.id}/chat`, {
+        headers: { 'Authorization': `Bearer ${user.accessToken}` }
+      });
+      if (res.ok) {
+        setMessages(await res.json());
+      }
+    } catch (err) {
+      console.error('Error fetching messages', err);
+    }
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !socket || !selectedOrder) return;
+    socket.emit('send_message', {
+      pedidoId: selectedOrder.id,
+      mensaje: newMessage,
+      remitenteId: user.id
+    });
+    setNewMessage('');
+  };
+
+  const handleCerrarTrato = async () => {
+    if (!socket || !selectedOrder) return;
+    socket.emit('cerrar_trato', { pedidoId: selectedOrder.id, rolId: user.rol_id });
+  };
+
+  return (
+    <div className="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden flex flex-col md:flex-row h-[600px] shadow-sm">
+      {/* Sidebar - Orders List */}
+      <div className="w-full md:w-1/3 border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest">
+        <div className="p-4 border-b border-outline-variant/30 bg-surface">
+          <h2 className="font-bold text-primary mb-2">Mis Compras</h2>
+          <div className="relative w-full">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+            <input 
+              type="text" 
+              placeholder="Buscar # orden..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 rounded border border-outline-variant text-sm focus:border-primary outline-none bg-surface"
+            />
           </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {filteredOrders.map(order => (
-              <div key={order.id} className="border border-outline-variant/30 rounded-xl p-5 hover:bg-surface-container-lowest transition-colors">
-                <div className="flex justify-between items-center mb-4 pb-4 border-b border-outline-variant/20">
+        </div>
+        
+        <div className="flex-1 overflow-y-auto">
+          {filteredOrders.length === 0 ? (
+            <div className="p-8 text-center text-on-surface-variant text-sm">No hay compras.</div>
+          ) : (
+            filteredOrders.map(order => (
+              <div 
+                key={order.id} 
+                onClick={() => handleSelectOrder(order)}
+                className={`p-4 border-b border-outline-variant/10 cursor-pointer transition-colors hover:bg-surface-container-low ${selectedOrder?.id === order.id ? 'bg-surface-container-low border-l-4 border-l-primary' : ''}`}
+              >
+                <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-label-md text-on-surface-variant uppercase tracking-widest text-xs">Orden #{order.id}</p>
-                    <p className="text-xs text-on-surface-variant mt-1">{new Date(order.creado_en).toLocaleDateString()}</p>
+                    <h3 className="font-bold text-primary text-sm">Orden #{order.id}</h3>
+                    <span className="text-xs text-on-surface-variant">{new Date(order.creado_en).toLocaleDateString()}</span>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-primary">${Number(order.total).toLocaleString('es-CL')}</p>
-                    <p className="text-xs text-primary bg-primary/10 px-2 py-1 rounded inline-block mt-1 font-label-md">{order.estado}</p>
-                    {order.metodo_contacto === 'chat_nativo' && (
-                      <button 
-                        onClick={() => setSelectedOrderForChat(order)}
-                        className="block w-full mt-2 bg-primary/10 text-primary py-1 px-2 rounded text-xs font-bold hover:bg-primary/20 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[14px] align-middle mr-1">chat</span>
-                        Ver Chat
-                      </button>
-                    )}
-                  </div>
+                  <span className="text-sm font-bold text-primary">${Number(order.total).toLocaleString('es-CL')}</span>
                 </div>
-                <div className="flex flex-col gap-3">
-                  {order.items?.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-surface-variant/30 rounded overflow-hidden flex-shrink-0">
-                        {item.imagen_principal && <img src={item.imagen_principal.startsWith('http') ? item.imagen_principal : `${import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}`}${item.imagen_principal}`} alt={item.nombre} className="w-full h-full object-cover" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-primary truncate">{item.nombre}</p>
-                        <p className="text-xs text-on-surface-variant truncate">{item.material} / {item.acabado_color}</p>
-                      </div>
-                      <div className="text-sm text-on-surface-variant">
-                        x{item.cantidad}
-                      </div>
-                    </div>
-                  ))}
+                <div className="mt-2 flex justify-between items-center">
+                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-surface-variant text-on-surface-variant">
+                    {order.estado}
+                  </span>
+                  {order.metodo_contacto === 'chat_nativo' && (
+                    <span className="material-symbols-outlined text-[16px] text-primary">chat</span>
+                  )}
                 </div>
               </div>
-            ))}
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Main Content - Chat & Details */}
+      <div className="flex-1 flex flex-col bg-surface-container-lowest">
+        {selectedOrder ? (
+          <>
+            {/* Header */}
+            <div className="p-4 border-b border-outline-variant/30 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <h2 className="font-bold text-primary text-lg">Orden #{selectedOrder.id}</h2>
+                <span className="text-sm text-on-surface-variant font-medium">Estado: {selectedOrder.estado}</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {selectedOrder.estado_id === 5 && selectedOrder.metodo_contacto === 'chat_nativo' && (
+                  <button 
+                    onClick={handleCerrarTrato}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-bold transition-colors ${selectedOrder.cliente_acepto_trato ? 'bg-[#137333] text-white' : 'bg-primary text-on-primary hover:opacity-90'}`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">handshake</span>
+                    {selectedOrder.cliente_acepto_trato ? 'Trato Aceptado' : 'Aceptar Trato'}
+                  </button>
+                )}
+                {selectedOrder.metodo_contacto === 'whatsapp' && (
+                  <span className="text-sm font-bold text-[#25D366] flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]">forum</span>
+                    Acordando por WhatsApp
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Aviso */}
+            <div className="bg-[#fff9c4] text-[#b06000] p-2 text-center text-xs font-medium border-b border-[#ffe082] shrink-0">
+              <span className="material-symbols-outlined text-[14px] align-middle mr-1">security</span>
+              Chat oficial de Royal Homes. Recuerda que no solicitaremos contraseñas ni datos de tarjetas por este medio.
+            </div>
+
+            {/* Resumen Productos (Collapsible or small list) */}
+            <div className="bg-surface p-3 border-b border-outline-variant/30 flex gap-2 overflow-x-auto items-center shrink-0">
+              <span className="text-xs font-bold text-on-surface-variant mr-2">Productos:</span>
+              {selectedOrder.items?.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-surface-container-lowest rounded p-1 border border-outline-variant/20 shrink-0">
+                  <div className="w-8 h-8 rounded overflow-hidden">
+                     {item.imagen_principal && <img src={item.imagen_principal.startsWith('http') ? item.imagen_principal : `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${item.imagen_principal}`} alt="prod" className="w-full h-full object-cover" />}
+                  </div>
+                  <div className="text-xs">
+                    <p className="font-bold text-primary truncate max-w-[100px]">{item.nombre}</p>
+                    <p className="text-on-surface-variant">x{item.cantidad}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+              {messages.map((msg, idx) => {
+                const isMe = msg.remitente_id === user.id;
+                return (
+                  <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                    <div className={`max-w-[80%] rounded-2xl p-3 shadow-sm ${isMe ? 'bg-primary text-on-primary rounded-tr-sm' : 'bg-surface text-on-surface rounded-tl-sm border border-outline-variant/20'}`}>
+                      <p className="text-sm font-body-md whitespace-pre-wrap">{msg.mensaje}</p>
+                    </div>
+                    <span className="text-[10px] text-on-surface-variant mt-1 font-caption">
+                      {new Date(msg.creado_en).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Box */}
+            {selectedOrder.metodo_contacto === 'chat_nativo' && (
+              <div className="p-3 bg-surface border-t border-outline-variant/30 shrink-0">
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Escribe un mensaje..."
+                    className="flex-1 bg-surface-container-lowest border border-outline-variant/50 rounded-full px-4 py-2 text-sm focus:border-primary focus:outline-none transition-colors"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={!newMessage.trim()}
+                    className="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
+                  >
+                    <span className="material-symbols-outlined">send</span>
+                  </button>
+                </form>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-on-surface-variant opacity-50 p-8 text-center">
+            <span className="material-symbols-outlined text-[64px] mb-4 font-light">forum</span>
+            <p className="font-label-lg uppercase tracking-widest">Selecciona una orden para ver detalles</p>
           </div>
         )}
       </div>
-
-      {selectedOrderForChat && (
-        <OrderChatModal 
-          order={selectedOrderForChat} 
-          user={user} 
-          onClose={() => setSelectedOrderForChat(null)} 
-          onTratoCerrado={() => window.location.reload()}
-        />
-      )}
     </div>
   );
 }

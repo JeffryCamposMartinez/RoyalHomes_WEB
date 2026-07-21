@@ -1,16 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { io } from 'socket.io-client';
 import { useAlert } from '../../contexts/AlertContext';
-import OrderChatModal from '../OrderChatModal';
 
 function OrderManager({ user }) {
   const { showAlert } = useAlert();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrderForChat, setSelectedOrderForChat] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [socket, setSocket] = useState(null);
+  
+  // Chat state
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+    
+    // Setup Socket.io
+    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
+      auth: { token: user.accessToken }
+    });
+
+    newSocket.on('receive_message', (msg) => {
+      setMessages(prev => [...prev, msg]);
+    });
+
+    newSocket.on('trato_actualizado', (pedido) => {
+      fetchOrders();
+      if (selectedOrder && selectedOrder.id === pedido.id) {
+        setSelectedOrder(prev => ({ ...prev, ...pedido }));
+      }
+      showAlert('El estado del trato ha sido actualizado', 'info');
+    });
+
+    newSocket.on('trato_cerrado_completado', () => {
+      fetchOrders();
+      showAlert('¡El trato se ha cerrado y el pago está habilitado!', 'success');
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [user.accessToken, showAlert]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -29,6 +63,40 @@ function OrderManager({ user }) {
     }
   };
 
+  const handleSelectOrder = async (order) => {
+    setSelectedOrder(order);
+    if (socket) {
+      socket.emit('join_order_room', order.id);
+    }
+    // Fetch messages for this order
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/${order.id}/chat`, {
+        headers: { 'Authorization': `Bearer ${user.accessToken}` }
+      });
+      if (res.ok) {
+        setMessages(await res.json());
+      }
+    } catch (err) {
+      console.error('Error fetching messages', err);
+    }
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !socket || !selectedOrder) return;
+
+    socket.emit('send_message', {
+      pedidoId: selectedOrder.id,
+      mensaje: newMessage,
+      remitenteId: user.id
+    });
+    setNewMessage('');
+  };
+
   const handleUpdateStatus = async (orderId, newStatusId) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/orders/${orderId}/status`, {
@@ -39,16 +107,23 @@ function OrderManager({ user }) {
         },
         body: JSON.stringify({ estado_id: newStatusId })
       });
-      
       if (res.ok) {
         showAlert('Estado actualizado', 'success');
         fetchOrders();
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder(prev => ({ ...prev, estado_id: newStatusId }));
+        }
       } else {
         showAlert('Error al actualizar', 'error');
       }
     } catch (err) {
       showAlert('Error de red', 'error');
     }
+  };
+
+  const handleCerrarTrato = async () => {
+    if (!socket || !selectedOrder) return;
+    socket.emit('cerrar_trato', { pedidoId: selectedOrder.id, rolId: user.rol_id });
   };
 
   const getStatusColor = (statusName) => {
@@ -60,114 +135,152 @@ function OrderManager({ user }) {
     return 'bg-surface-variant text-on-surface-variant';
   };
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return <div className="p-8 text-center">Cargando pedidos...</div>;
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <h1 className="text-2xl font-bold text-primary mb-6">Gestión de Pedidos y Solicitudes</h1>
-      
-      <div className="bg-surface rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-surface-container-lowest">
-              <tr className="border-b border-outline-variant/30 font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
-                <th className="py-4 px-4 font-medium">ID / Fecha</th>
-                <th className="py-4 px-4 font-medium">Cliente</th>
-                <th className="py-4 px-4 font-medium">Detalles</th>
-                <th className="py-4 px-4 font-medium">Estado</th>
-                <th className="py-4 px-4 font-medium text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="font-body-md text-body-md">
-              {orders.map((order) => (
-                <tr key={order.id} className="border-b border-outline-variant/10 hover:bg-surface-container-lowest transition-colors">
-                  <td className="py-4 px-4">
-                    <span className="font-bold block text-primary">#{order.id}</span>
-                    <span className="text-sm text-on-surface-variant">{new Date(order.creado_en).toLocaleDateString()}</span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="block font-medium">{order.cliente}</span>
-                    <span className="block text-sm text-on-surface-variant">{order.cliente_email}</span>
-                    <span className="block text-sm text-on-surface-variant">{order.cliente_telefono || order.whatsapp_contacto || ''}</span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="block font-bold text-primary">${Number(order.total).toLocaleString('es-CL')}</span>
-                    <span className="block text-sm">Método Entrega: {order.metodo_entrega === 'retiro_fisico' ? 'Retiro' : 'Acordar'}</span>
-                    <span className="block text-sm">Método Contacto: {order.metodo_contacto}</span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full font-caption text-xs uppercase tracking-wider font-bold ${getStatusColor(order.estado)}`}>
-                      {order.estado}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-right">
-                    <div className="flex justify-end gap-2">
-                      {order.metodo_contacto === 'chat_nativo' && (
-                        <button 
-                          onClick={() => setSelectedOrderForChat(order)}
-                          className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors tooltip-trigger relative"
-                          title="Abrir Chat Nativo"
-                        >
-                          <span className="material-symbols-outlined">chat</span>
-                        </button>
-                      )}
-                      {order.metodo_contacto === 'whatsapp' && order.whatsapp_contacto && (
-                        <a 
-                          href={`https://wa.me/${order.whatsapp_contacto.replace(/[^0-9]/g, '')}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="p-2 bg-[#25D366]/10 text-[#25D366] rounded-lg hover:bg-[#25D366]/20 transition-colors tooltip-trigger relative"
-                          title="Abrir WhatsApp"
-                        >
-                          <span className="material-symbols-outlined">forum</span>
-                        </a>
-                      )}
-                      
-                      {/* TODO: Add logic to approve / reject */}
-                      {order.estado_id === 1 && ( // assuming 1 is Pendiente de Aprobación
-                        <>
-                          <button 
-                            onClick={() => handleUpdateStatus(order.id, 5)} // Assuming 5 is En Curso
-                            className="p-2 bg-[#137333]/10 text-[#137333] rounded-lg hover:bg-[#137333]/20 transition-colors tooltip-trigger relative"
-                            title="Aprobar Solicitud"
-                          >
-                            <span className="material-symbols-outlined">check_circle</span>
-                          </button>
-                          <button 
-                            onClick={() => handleUpdateStatus(order.id, 4)} // Assuming 4 is Cancelado / Rechazado
-                            className="p-2 bg-[#c5221f]/10 text-[#c5221f] rounded-lg hover:bg-[#c5221f]/20 transition-colors tooltip-trigger relative"
-                            title="Rechazar Solicitud"
-                          >
-                            <span className="material-symbols-outlined">cancel</span>
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {orders.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="py-8 text-center text-on-surface-variant">
-                    No hay pedidos ni solicitudes.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+    <div className="h-full flex flex-col md:flex-row bg-background overflow-hidden">
+      {/* Sidebar - Lista de Pedidos */}
+      <div className="w-full md:w-1/3 max-w-[400px] border-r border-outline-variant/30 flex flex-col bg-surface h-[calc(100vh-64px)] md:h-screen">
+        <div className="p-4 border-b border-outline-variant/30 bg-surface-container-lowest shrink-0">
+          <h1 className="text-xl font-bold text-primary uppercase tracking-widest">Pedidos y Solicitudes</h1>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {orders.map(order => (
+            <div 
+              key={order.id} 
+              onClick={() => handleSelectOrder(order)}
+              className={`p-4 border-b border-outline-variant/10 cursor-pointer transition-colors hover:bg-surface-container-low ${selectedOrder?.id === order.id ? 'bg-surface-container-low border-l-4 border-l-primary' : ''}`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h3 className="font-bold text-primary">Pedido #{order.id}</h3>
+                  <p className="text-sm font-medium text-on-surface">{order.cliente}</p>
+                </div>
+                <span className="text-xs text-on-surface-variant">
+                  {new Date(order.creado_en).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-bold ${getStatusColor(order.estado)}`}>
+                  {order.estado}
+                </span>
+                <span className="text-sm font-bold text-primary">${Number(order.total).toLocaleString('es-CL')}</span>
+              </div>
+            </div>
+          ))}
+          {orders.length === 0 && (
+            <div className="p-8 text-center text-on-surface-variant text-sm">
+              No hay pedidos ni solicitudes.
+            </div>
+          )}
         </div>
       </div>
 
-      {selectedOrderForChat && (
-        <OrderChatModal 
-          order={selectedOrderForChat} 
-          user={user} 
-          onClose={() => setSelectedOrderForChat(null)} 
-          onTratoCerrado={() => fetchOrders()}
-        />
-      )}
+      {/* Main Content - Vista de Chat y Detalles */}
+      <div className="flex-1 flex flex-col bg-surface-container-lowest h-[calc(100vh-64px)] md:h-screen">
+        {selectedOrder ? (
+          <>
+            {/* Header del Chat */}
+            <div className="p-4 border-b border-outline-variant/30 bg-surface flex justify-between items-center shrink-0">
+              <div>
+                <h2 className="font-bold text-primary text-lg">Chat del Pedido #{selectedOrder.id}</h2>
+                <p className="text-sm text-on-surface-variant">Cliente: {selectedOrder.cliente} ({selectedOrder.cliente_email})</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Actions based on state */}
+                {selectedOrder.estado_id === 1 && (
+                  <>
+                    <button 
+                      onClick={() => handleUpdateStatus(selectedOrder.id, 5)} 
+                      className="px-4 py-2 bg-[#137333] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity"
+                    >
+                      Aprobar
+                    </button>
+                    <button 
+                      onClick={() => handleUpdateStatus(selectedOrder.id, 4)} 
+                      className="px-4 py-2 bg-[#c5221f] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity"
+                    >
+                      Rechazar
+                    </button>
+                  </>
+                )}
+                {selectedOrder.estado_id === 5 && selectedOrder.metodo_contacto === 'chat_nativo' && (
+                  <button 
+                    onClick={handleCerrarTrato}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-colors ${selectedOrder.admin_acepto_trato ? 'bg-[#137333] text-white' : 'bg-primary text-on-primary hover:opacity-90'}`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">handshake</span>
+                    {selectedOrder.admin_acepto_trato ? 'Trato Aceptado' : 'Aceptar Trato'}
+                  </button>
+                )}
+                {selectedOrder.metodo_contacto === 'whatsapp' && selectedOrder.whatsapp_contacto && (
+                  <a 
+                    href={`https://wa.me/${selectedOrder.whatsapp_contacto.replace(/[^0-9]/g, '')}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">forum</span>
+                    WhatsApp
+                  </a>
+                )}
+              </div>
+            </div>
+            
+            {/* Aviso de seguridad (como Carpetazo) */}
+            <div className="bg-[#fff9c4] text-[#b06000] p-2 text-center text-xs font-medium border-b border-[#ffe082] shrink-0">
+              <span className="material-symbols-outlined text-[14px] align-middle mr-1">security</span>
+              Para su seguridad, acuerde bien los detalles antes de aceptar el trato. Este chat es oficial de Royal Homes.
+            </div>
+
+            {/* Mensajes del Chat */}
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+              {messages.map((msg, idx) => {
+                const isMe = msg.remitente_id === user.id;
+                return (
+                  <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                    <div className={`max-w-[75%] rounded-2xl p-3 shadow-sm ${isMe ? 'bg-primary text-on-primary rounded-tr-sm' : 'bg-surface text-on-surface rounded-tl-sm border border-outline-variant/20'}`}>
+                      <p className="text-sm font-body-md whitespace-pre-wrap">{msg.mensaje}</p>
+                    </div>
+                    <span className="text-[10px] text-on-surface-variant mt-1 font-caption">
+                      {new Date(msg.creado_en).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input de Mensaje */}
+            <div className="p-4 bg-surface border-t border-outline-variant/30 shrink-0">
+              <form onSubmit={handleSendMessage} className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder={selectedOrder.metodo_contacto === 'chat_nativo' ? "Escribe un mensaje..." : "El usuario prefirió usar WhatsApp."}
+                  disabled={selectedOrder.metodo_contacto !== 'chat_nativo'}
+                  className="flex-1 bg-surface-container-lowest border border-outline-variant/50 rounded-full px-4 py-3 text-sm focus:border-primary focus:outline-none transition-colors disabled:opacity-50"
+                />
+                <button 
+                  type="submit"
+                  disabled={!newMessage.trim() || selectedOrder.metodo_contacto !== 'chat_nativo'}
+                  className="bg-primary text-on-primary w-12 h-12 rounded-full flex items-center justify-center hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
+                >
+                  <span className="material-symbols-outlined">send</span>
+                </button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-on-surface-variant opacity-50 p-8 text-center">
+            <span className="material-symbols-outlined text-[64px] mb-4 font-light">forum</span>
+            <p className="font-label-lg uppercase tracking-widest">Selecciona un pedido para ver el chat</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
