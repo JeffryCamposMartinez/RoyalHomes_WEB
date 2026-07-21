@@ -5,7 +5,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBPlP4sjK2AR_g-8aCEtq0jbvRcDfCHq-c",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "royalhomes-58cc0.firebaseapp.com",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "auth.royalhomes.cl",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "royalhomes-58cc0",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "royalhomes-58cc0.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "896891068490",
