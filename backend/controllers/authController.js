@@ -32,10 +32,10 @@ exports.login = async (req, res) => {
 exports.googleLogin = async (req, res) => {
   try {
     const { idToken } = req.body;
-    const admin = require('../firebaseAdmin');
+    const { getAuth } = require('../firebaseAdmin');
     
     // Verify Firebase token
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await getAuth().verifyIdToken(idToken);
     const { email, name, picture, uid } = decodedToken;
     
     // Check if user exists in MySQL
