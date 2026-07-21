@@ -56,7 +56,7 @@ exports.getMyOrders = async (req, res) => {
     // Fetch items for each order
     for (let order of orders) {
       const [items] = await connection.query(
-        `SELECT d.cantidad, d.precio_unitario, v.sku, v.material, v.acabado_color, prod.nombre, prod.imagen_principal
+        `SELECT d.cantidad, d.precio_unitario, v.sku, v.material, v.acabado_color, prod.nombre, prod.imagen_base as imagen_principal
          FROM detalles_pedido d
          JOIN variantes_producto v ON d.variante_id = v.id
          JOIN productos prod ON v.producto_id = prod.id
