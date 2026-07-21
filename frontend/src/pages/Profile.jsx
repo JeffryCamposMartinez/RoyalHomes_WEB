@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAlert } from '../contexts/AlertContext';
 import AdSenseBlock from '../components/AdSenseBlock';
+import OrderChatModal from '../components/OrderChatModal';
 
 function Profile({ user, onUpdateUser }) {
   const [activeTab, setActiveTab] = useState('datos'); // 'datos', 'direcciones', 'compras'
@@ -94,7 +95,7 @@ function Profile({ user, onUpdateUser }) {
         <main className="flex-1 min-w-0">
           {activeTab === 'datos' && <MisDatos profile={profileData} setProfile={setProfileData} user={user} onUpdateUser={onUpdateUser} showAlert={showAlert} />}
           {activeTab === 'direcciones' && <MisDirecciones profile={profileData} setProfile={setProfileData} user={user} showAlert={showAlert} />}
-          {activeTab === 'compras' && <MisCompras orders={orders} />}
+          {activeTab === 'compras' && <MisCompras orders={orders} user={user} />}
         </main>
 
       </div>
@@ -469,8 +470,9 @@ function MisDirecciones({ profile, setProfile, user, showAlert }) {
 }
 
 // ================= MIS COMPRAS =================
-function MisCompras({ orders }) {
+function MisCompras({ orders, user }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedOrderForChat, setSelectedOrderForChat] = useState(null);
 
   const filteredOrders = orders.filter(o => 
     o.id.toString().includes(searchTerm)
@@ -522,6 +524,15 @@ function MisCompras({ orders }) {
                   <div className="text-right">
                     <p className="font-bold text-primary">${Number(order.total).toLocaleString('es-CL')}</p>
                     <p className="text-xs text-primary bg-primary/10 px-2 py-1 rounded inline-block mt-1 font-label-md">{order.estado}</p>
+                    {order.metodo_contacto === 'chat_nativo' && (
+                      <button 
+                        onClick={() => setSelectedOrderForChat(order)}
+                        className="block w-full mt-2 bg-primary/10 text-primary py-1 px-2 rounded text-xs font-bold hover:bg-primary/20 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[14px] align-middle mr-1">chat</span>
+                        Ver Chat
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-3">
@@ -545,6 +556,15 @@ function MisCompras({ orders }) {
           </div>
         )}
       </div>
+
+      {selectedOrderForChat && (
+        <OrderChatModal 
+          order={selectedOrderForChat} 
+          user={user} 
+          onClose={() => setSelectedOrderForChat(null)} 
+          onTratoCerrado={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 }

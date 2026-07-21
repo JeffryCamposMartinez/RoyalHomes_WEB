@@ -293,9 +293,38 @@ exports.updateContactSettings = async (req, res) => {
        direccion_fisica = VALUES(direccion_fisica)`,
       [instagram_url, facebook_url, whatsapp, email_contacto, telefono, direccion_fisica]
     );
-    res.json({ message: 'Configuración de contacto actualizada' });
+    res.json({ message: 'Configuracion de contacto actualizada' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error al actualizar configuración de contacto' });
+    res.status(500).json({ message: 'Error al actualizar configuracion de contacto' });
+  }
+};
+
+// --- ORDERS ---
+exports.getAllOrders = async (req, res) => {
+  try {
+    const [orders] = await db.query(`
+      SELECT p.*, e.nombre as estado, u.nombre as cliente, u.email as cliente_email, u.telefono as cliente_telefono 
+      FROM pedidos p 
+      JOIN estados_pedido e ON p.estado_id = e.id 
+      JOIN usuarios u ON p.usuario_id = u.id 
+      ORDER BY p.creado_en DESC
+    `);
+    res.json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching orders' });
+  }
+};
+
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado_id } = req.body;
+    await db.query('UPDATE pedidos SET estado_id = ? WHERE id = ?', [estado_id, id]);
+    res.json({ message: 'Order status updated' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating order status' });
   }
 };

@@ -16,6 +16,10 @@ function Checkout({ cart, clearCart }) {
   
   const [processing, setProcessing] = useState(false);
   
+  const [metodoEntrega, setMetodoEntrega] = useState('retiro_fisico');
+  const [metodoContacto, setMetodoContacto] = useState('chat_nativo');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  
   const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
   const getToken = () => {
@@ -81,8 +85,13 @@ function Checkout({ cart, clearCart }) {
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
-    if (!selectedAddressId) {
+    if (metodoEntrega !== 'retiro_fisico' && !selectedAddressId) {
       showAlert('Por favor, selecciona o agrega una dirección de envío.', 'error');
+      return;
+    }
+
+    if (metodoContacto === 'whatsapp' && !whatsappNumber.trim()) {
+      showAlert('Por favor, ingresa tu número de WhatsApp para poder contactarte.', 'error');
       return;
     }
     
@@ -99,16 +108,19 @@ function Checkout({ cart, clearCart }) {
         },
         body: JSON.stringify({
           items: cart,
-          shippingInfo: selectedAddress,
-          total
+          shippingInfo: metodoEntrega === 'retiro_fisico' ? null : selectedAddress,
+          total,
+          metodo_entrega: metodoEntrega,
+          metodo_contacto: metodoContacto,
+          whatsapp_contacto: metodoContacto === 'whatsapp' ? whatsappNumber : null
         })
       });
 
       if (res.ok) {
         const data = await res.json();
-        showAlert(`¡Simulación exitosa! Orden #${data.orderId} creada. Preparado para redirigir a Mercado Pago.`, 'success');
+        showAlert(`¡Solicitud enviada! Orden #${data.orderId}. El vendedor se pondrá en contacto pronto.`, 'success');
         clearCart();
-        navigate('/');
+        navigate('/profile'); // Redirect to profile to see the order
       } else {
         showAlert('Hubo un problema al procesar la orden. Asegúrate de haber iniciado sesión.', 'error');
       }
@@ -140,12 +152,20 @@ function Checkout({ cart, clearCart }) {
         <div className="flex-[2] bg-surface-container-low p-8 rounded-2xl">
           <div className="flex justify-between items-center mb-8 border-b border-outline-variant/30 pb-4">
             <h2 className="font-headline-md text-headline-md text-primary">Dirección de Envío</h2>
-            <button type="button" onClick={() => setShowAddressModal(true)} className="bg-primary text-on-primary px-4 py-2 font-label-md uppercase tracking-widest text-xs rounded hover:opacity-90 transition-opacity">
-              Añadir Nueva
-            </button>
+            {metodoEntrega !== 'retiro_fisico' && (
+              <button type="button" onClick={() => setShowAddressModal(true)} className="bg-primary text-on-primary px-4 py-2 font-label-md uppercase tracking-widest text-xs rounded hover:opacity-90 transition-opacity">
+                Añadir Nueva
+              </button>
+            )}
           </div>
           
-          {loadingProfile ? (
+          {metodoEntrega === 'retiro_fisico' ? (
+            <div className="text-center py-12 bg-surface rounded-xl border border-outline-variant/30">
+              <span className="material-symbols-outlined text-4xl text-primary mb-3">storefront</span>
+              <p className="text-on-surface-variant font-medium">Retiro en nuestra tienda física.</p>
+              <p className="text-sm text-on-surface-variant mt-2">Av. Vitacura 2345, Santiago. Coordinaremos el horario de retiro luego de confirmar tu solicitud.</p>
+            </div>
+          ) : loadingProfile ? (
             <div className="text-center py-8 text-on-surface-variant">Cargando direcciones...</div>
           ) : profile?.direcciones && profile.direcciones.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -198,9 +218,57 @@ function Checkout({ cart, clearCart }) {
           )}
         </div>
 
-        {/* Resumen de la Orden */}
+        {/* Resumen de la Orden y Opciones */}
         <div className="flex-1">
-          <div className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 sticky top-24 shadow-[0_10px_20px_rgba(0,0,0,0.02)]">
+          <div className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 shadow-[0_10px_20px_rgba(0,0,0,0.02)]">
+            <h2 className="font-headline-sm text-headline-sm text-primary mb-6">Opciones de Entrega</h2>
+            
+            <div className="flex flex-col gap-3 mb-6">
+              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'retiro_fisico' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
+                <input type="radio" name="entrega" value="retiro_fisico" checked={metodoEntrega === 'retiro_fisico'} onChange={(e) => setMetodoEntrega(e.target.value)} className="w-4 h-4 text-primary" />
+                <div>
+                  <span className="font-bold text-primary text-sm uppercase tracking-widest block">Retiro en Tienda Física</span>
+                  <span className="text-sm text-on-surface-variant block mt-1">Av. Vitacura 2345, Santiago</span>
+                </div>
+              </label>
+              
+              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'acordar_vendedor' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
+                <input type="radio" name="entrega" value="acordar_vendedor" checked={metodoEntrega === 'acordar_vendedor'} onChange={(e) => setMetodoEntrega(e.target.value)} className="w-4 h-4 text-primary" />
+                <div>
+                  <span className="font-bold text-primary text-sm uppercase tracking-widest block">Acordar Envío con Vendedor</span>
+                  <span className="text-sm text-on-surface-variant block mt-1">Coordinaremos la entrega y el costo de envío.</span>
+                </div>
+              </label>
+            </div>
+
+            <h2 className="font-headline-sm text-headline-sm text-primary mb-6 mt-8">Método de Coordinación</h2>
+            <p className="text-sm text-on-surface-variant mb-4">El pago se habilitará luego de que coordinemos los detalles del pedido.</p>
+
+            <div className="flex flex-col gap-3 mb-6">
+              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoContacto === 'whatsapp' ? 'border-[#25D366] bg-[#25D366]/5' : 'border-outline-variant/50'}`}>
+                <input type="radio" name="contacto" value="whatsapp" checked={metodoContacto === 'whatsapp'} onChange={(e) => setMetodoContacto(e.target.value)} className="w-4 h-4 text-[#25D366]" />
+                <div className="flex-1">
+                  <span className="font-bold text-[#25D366] text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">forum</span> WhatsApp</span>
+                </div>
+              </label>
+
+              {metodoContacto === 'whatsapp' && (
+                <div className="ml-4 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Tu número de WhatsApp *</label>
+                  <input type="text" placeholder="+56 9 1234 5678" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full bg-surface-container border border-outline-variant/50 rounded-lg p-3 text-sm focus:border-[#25D366] focus:outline-none transition-colors" />
+                </div>
+              )}
+
+              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoContacto === 'chat_nativo' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
+                <input type="radio" name="contacto" value="chat_nativo" checked={metodoContacto === 'chat_nativo'} onChange={(e) => setMetodoContacto(e.target.value)} className="w-4 h-4 text-primary" />
+                <div>
+                  <span className="font-bold text-primary text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">chat</span> Chat en la Página</span>
+                </div>
+              </label>
+            </div>
+
+            <div className="h-px bg-outline-variant/30 my-8"></div>
+
             <h2 className="font-headline-sm text-headline-sm text-primary mb-6">Resumen</h2>
             <div className="flex flex-col gap-4 mb-8">
               {cart.map((item, idx) => (
@@ -221,9 +289,9 @@ function Checkout({ cart, clearCart }) {
               type="button" 
               onClick={handleSubmit}
               disabled={processing}
-              className={`w-full py-4 rounded-full font-label-md text-label-md uppercase tracking-widest transition-all ${processing ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed' : 'bg-[#009EE3] text-white hover:bg-[#0081ba] shadow-md hover:scale-105'}`}
+              className={`w-full py-4 rounded-full font-label-md text-label-md uppercase tracking-widest transition-all ${processing ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90 shadow-md hover:scale-[1.02]'}`}
             >
-              {processing ? 'Procesando...' : 'Pagar con Mercado Pago'}
+              {processing ? 'Enviando...' : 'Enviar Solicitud de Compra'}
             </button>
           </div>
         </div>

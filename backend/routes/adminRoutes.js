@@ -30,4 +30,8 @@ router.post('/categories', verifyToken, isAdmin, adminController.createCategory)
 router.put('/categories/:id', verifyToken, isAdmin, adminController.updateCategory);
 router.delete('/categories/:id', verifyToken, isAdmin, adminController.deleteCategory);
 
+// Orders
+router.get('/orders', verifyToken, isAdmin, adminController.getAllOrders);
+router.put('/orders/:id/status', verifyToken, isAdmin, adminController.updateOrderStatus);
+
 module.exports = router;

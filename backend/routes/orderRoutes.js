@@ -5,5 +5,6 @@ const { verifyToken } = require('../middleware/auth');
 
 router.post('/create', verifyToken, orderController.createOrder);
 router.get('/my-orders', verifyToken, orderController.getMyOrders);
+router.get('/:id/chat', verifyToken, orderController.getOrderChat);
 
 module.exports = router;

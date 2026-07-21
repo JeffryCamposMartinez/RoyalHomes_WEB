@@ -1,34 +1,25 @@
 const db = require('../config/db');
 
 exports.createOrder = async (req, res) => {
-  const { shippingInfo, items, total } = req.body;
+  const { shippingInfo, items, total, metodo_entrega, metodo_contacto, whatsapp_contacto } = req.body;
   const userId = req.userId;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ message: 'Empty order' });
   }
 
-  const direccion_envio = shippingInfo ? `${shippingInfo.direccion}, ${shippingInfo.ciudad}, ${shippingInfo.codigoPostal}` : 'Sin dirección';
+  const direccion_envio = shippingInfo ? `${shippingInfo.direccion || ''}, ${shippingInfo.ciudad || ''}, ${shippingInfo.codigoPostal || ''}` : 'Sin dirección';
 
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
     
-    // Insert order (estado_id = 1 is Pendiente)
+    // Insert order (estado_id = 1 is Pendiente de Aprobación)
     const [orderResult] = await connection.query(
-      'INSERT INTO pedidos (usuario_id, estado_id, direccion_envio, total) VALUES (?, 1, ?, ?)',
-      [userId, direccion_envio, total]
+      'INSERT INTO pedidos (usuario_id, estado_id, direccion_envio, total, metodo_entrega, metodo_contacto, whatsapp_contacto) VALUES (?, 1, ?, ?, ?, ?, ?)',
+      [userId, direccion_envio, total, metodo_entrega || 'retiro_fisico', metodo_contacto || 'chat_nativo', whatsapp_contacto || null]
     );
     const orderId = orderResult.insertId;
-    
-    // Generar un preference_id de prueba para simular Mercado Pago
-    const mockPreferenceId = `MP-PREF-MOCK-${Date.now()}-${orderId}`;
-
-    // Actualizar pedido con el preference_id
-    await connection.query(
-      'UPDATE pedidos SET mercadopago_preference_id = ? WHERE id = ?',
-      [mockPreferenceId, orderId]
-    );
     
     // Insert items
     for (const item of items) {
@@ -39,7 +30,7 @@ exports.createOrder = async (req, res) => {
     }
     
     await connection.commit();
-    res.status(201).json({ message: 'Order created', orderId, preferenceId: mockPreferenceId, init_point: 'https://sandbox.mercadopago.cl/checkout/v1/redirect?pref_id=' + mockPreferenceId });
+    res.status(201).json({ message: 'Order created as request', orderId });
   } catch (error) {
     await connection.rollback();
     console.error(error);
@@ -54,7 +45,7 @@ exports.getMyOrders = async (req, res) => {
   const connection = await db.getConnection();
   try {
     const [orders] = await connection.query(
-      `SELECT p.id, p.total, p.creado_en, e.nombre as estado, p.direccion_envio
+      `SELECT p.*, e.nombre as estado
        FROM pedidos p
        JOIN estados_pedido e ON p.estado_id = e.id
        WHERE p.usuario_id = ?
@@ -81,5 +72,23 @@ exports.getMyOrders = async (req, res) => {
     res.status(500).json({ message: 'Error fetching orders' });
   } finally {
     connection.release();
+  }
+};
+
+exports.getOrderChat = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [messages] = await db.query(
+      `SELECT m.*, u.nombre, u.rol_id 
+       FROM mensajes_pedido m 
+       JOIN usuarios u ON m.remitente_id = u.id 
+       WHERE m.pedido_id = ? 
+       ORDER BY m.creado_en ASC`,
+      [id]
+    );
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching chat' });
   }
 };

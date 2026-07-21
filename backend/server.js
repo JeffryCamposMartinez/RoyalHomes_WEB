@@ -36,7 +36,7 @@ const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/Publicidad', express.static(path.join(__dirname, 'Publicidad')));
 
-// Auto-migraciones para asegurar que la estructura de la BD esté actualizada en producción
+// Auto-migraciones
 const db = require('./config/db');
 async function runMigrations() {
   try {
@@ -45,16 +45,29 @@ async function runMigrations() {
   } catch (e) {
     if (e.code !== 'ER_DUP_FIELDNAME') console.error("Error en migración productos:", e);
   }
-  
-  try {
-    await db.query("ALTER TABLE variantes_producto ADD COLUMN especificaciones TEXT NULL");
-    console.log("Migración exitosa: Columna 'especificaciones' agregada a variantes.");
-  } catch (e) {
-    if (e.code !== 'ER_DUP_FIELDNAME') console.error("Error en migración variantes:", e);
-  }
 }
 runMigrations();
 
-app.listen(PORT, () => {
+// Configurar servidor HTTP y Socket.io
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [
+      'http://localhost:5173', 
+      'http://localhost:4173',
+      'https://royalhomes.cl', 
+      'https://www.royalhomes.cl'
+    ],
+    methods: ['GET', 'POST']
+  }
+});
+
+// Importar lógica de Sockets
+require('./socketHandler')(io);
+
+server.listen(PORT, () => {
   console.log(`Backend Profesional corriendo en http://localhost:${PORT}`);
 });
