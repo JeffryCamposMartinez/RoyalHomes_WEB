@@ -33,20 +33,22 @@ function OrderChatModal({ order, user, onClose, onTratoCerrado }) {
     });
 
     newSocket.on('connect', () => {
-      newSocket.emit('joinOrderRoom', order.id);
+      newSocket.emit('join_order_room', order.id);
     });
 
-    newSocket.on('receiveMessage', (msg) => {
+    newSocket.on('receive_message', (msg) => {
       setMessages(prev => [...prev, msg]);
     });
 
-    newSocket.on('tratoStatusChanged', ({ orderId, status }) => {
-      if (orderId === order.id) {
-        // Refresh orders in parent
-        if (onTratoCerrado) onTratoCerrado();
-        // Option to close chat or show a message
-        showAlert('El estado del trato ha cambiado', 'info');
-      }
+    newSocket.on('trato_actualizado', (pedido) => {
+      // Refresh orders in parent
+      if (onTratoCerrado) onTratoCerrado();
+      showAlert('El estado del trato ha sido actualizado', 'info');
+    });
+
+    newSocket.on('trato_cerrado_completado', () => {
+      if (onTratoCerrado) onTratoCerrado();
+      showAlert('¡El trato se ha cerrado y el pago está habilitado!', 'success');
     });
 
     setSocket(newSocket);
@@ -64,10 +66,10 @@ function OrderChatModal({ order, user, onClose, onTratoCerrado }) {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
 
-    socket.emit('sendMessage', {
-      orderId: order.id,
-      message: newMessage,
-      token: user.accessToken
+    socket.emit('send_message', {
+      pedidoId: order.id,
+      mensaje: newMessage,
+      remitenteId: user.id
     });
 
     setNewMessage('');
@@ -75,7 +77,7 @@ function OrderChatModal({ order, user, onClose, onTratoCerrado }) {
 
   const handleCerrarTrato = async () => {
     if (!socket) return;
-    socket.emit('cerrarTrato', { orderId: order.id, token: user.accessToken });
+    socket.emit('cerrar_trato', { pedidoId: order.id, rolId: user.rol_id });
   };
 
   return (
