@@ -140,9 +140,9 @@ function OrderManager({ user }) {
   }
 
   return (
-    <div className="h-full flex flex-col md:flex-row bg-background overflow-hidden">
+    <div className="h-[calc(100vh-140px)] min-h-[600px] flex flex-col md:flex-row bg-background overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm">
       {/* Sidebar - Lista de Pedidos */}
-      <div className="w-full md:w-1/3 max-w-[400px] border-r border-outline-variant/30 flex flex-col bg-surface h-[calc(100vh-64px)] md:h-screen">
+      <div className="w-full md:w-1/3 max-w-[400px] border-r border-outline-variant/30 flex flex-col bg-surface h-full">
         <div className="p-4 border-b border-outline-variant/30 bg-surface-container-lowest shrink-0">
           <h1 className="text-xl font-bold text-primary uppercase tracking-widest">Pedidos y Solicitudes</h1>
         </div>
@@ -179,7 +179,7 @@ function OrderManager({ user }) {
       </div>
 
       {/* Main Content - Vista de Chat y Detalles */}
-      <div className="flex-1 flex flex-col bg-surface-container-lowest h-[calc(100vh-64px)] md:h-screen">
+      <div className="flex-1 flex flex-col bg-surface-container-lowest h-full">
         {selectedOrder ? (
           <>
             {/* Header del Chat */}
