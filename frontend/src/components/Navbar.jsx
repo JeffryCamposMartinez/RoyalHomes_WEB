@@ -47,6 +47,13 @@ function Navbar({ cartCount, user, onLogout }) {
                       <span className="material-symbols-outlined text-[18px]">person</span>
                       Mi Perfil
                     </Link>
+                    <Link 
+                      to="/profile?tab=compras"
+                      className="w-full px-4 py-3 text-left font-label-md text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2 transition-colors uppercase tracking-widest border-b border-outline-variant/20"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
+                      Mis Compras
+                    </Link>
                     <button 
                       onClick={onLogout}
                       className="w-full px-4 py-3 text-left font-label-md text-sm text-error hover:bg-error/10 flex items-center gap-2 transition-colors uppercase tracking-widest"

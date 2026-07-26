@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAlert } from '../contexts/AlertContext';
 import AdSenseBlock from '../components/AdSenseBlock';
 import { io } from 'socket.io-client';
 
 function Profile({ user, onUpdateUser }) {
-  const [activeTab, setActiveTab] = useState('datos'); // 'datos', 'direcciones', 'compras'
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialTab = searchParams.get('tab') || 'datos';
+  const [activeTab, setActiveTab] = useState(initialTab); // 'datos', 'direcciones', 'compras'
   const [profileData, setProfileData] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,6 +16,10 @@ function Profile({ user, onUpdateUser }) {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab) setActiveTab(tab);
+    
     const fetchData = async () => {
       try {
         const [profileRes, ordersRes] = await Promise.all([
@@ -29,7 +37,7 @@ function Profile({ user, onUpdateUser }) {
       }
     };
     fetchData();
-  }, [user.accessToken, showAlert]);
+  }, [user.accessToken, showAlert, location.search]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
