@@ -483,7 +483,7 @@ function MisCompras({ orders, user }) {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
   const { showAlert } = useAlert();
 
   const filteredOrders = orders.filter(o => 
@@ -533,7 +533,9 @@ function MisCompras({ orders, user }) {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const handleSendMessage = (e) => {
@@ -654,7 +656,7 @@ function MisCompras({ orders, user }) {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
               {messages.map((msg, idx) => {
                 const isMe = msg.remitente_id === user.id;
                 return (
@@ -668,7 +670,6 @@ function MisCompras({ orders, user }) {
                   </div>
                 );
               })}
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Box */}

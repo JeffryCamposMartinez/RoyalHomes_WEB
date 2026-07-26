@@ -12,7 +12,7 @@ function OrderManager({ user }) {
   // Chat state
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     fetchOrders();
@@ -82,7 +82,9 @@ function OrderManager({ user }) {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const handleSendMessage = (e) => {
@@ -235,8 +237,8 @@ function OrderManager({ user }) {
               Para su seguridad, acuerde bien los detalles antes de aceptar el trato. Este chat es oficial de Royal Homes.
             </div>
 
-            {/* Mensajes del Chat */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+            {/* Área de Mensajes */}
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
               {messages.map((msg, idx) => {
                 const isMe = msg.remitente_id === user.id;
                 return (
@@ -250,7 +252,6 @@ function OrderManager({ user }) {
                   </div>
                 );
               })}
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input de Mensaje */}
