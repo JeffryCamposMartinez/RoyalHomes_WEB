@@ -610,7 +610,7 @@ function MisCompras({ orders, user }) {
       </div>
 
       {/* Main Content - Chat & Details */}
-      <div ref={chatSectionRef} className="flex-1 flex flex-col bg-surface-container-lowest min-h-[500px] md:min-h-0">
+      <div ref={chatSectionRef} className="flex-1 flex flex-col bg-surface-container-lowest h-[500px] md:h-auto md:min-h-0">
         {selectedOrder ? (
           <>
             {/* Header */}
