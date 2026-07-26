@@ -477,7 +477,10 @@ function MisDirecciones({ profile, setProfile, user, showAlert }) {
   );
 }
 
+import { useSearchParams } from 'react-router-dom';
+
 function MisCompras({ orders, user, initialOrderId }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [socket, setSocket] = useState(null);
@@ -485,7 +488,6 @@ function MisCompras({ orders, user, initialOrderId }) {
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef(null);
   const chatSectionRef = useRef(null);
-  const processedOrderId = useRef(null);
   const { showAlert } = useAlert();
 
   const filteredOrders = orders.filter(o => 
@@ -494,11 +496,12 @@ function MisCompras({ orders, user, initialOrderId }) {
 
   // Auto-seleccionar si viene order_id en la URL
   useEffect(() => {
-    if (initialOrderId && orders.length > 0 && processedOrderId.current !== initialOrderId) {
-      const order = orders.find(o => o.id.toString() === initialOrderId);
-      if (order) {
-        handleSelectOrder(order);
-        processedOrderId.current = initialOrderId;
+    if (initialOrderId && orders.length > 0) {
+      if (!selectedOrder || selectedOrder.id.toString() !== initialOrderId) {
+        const order = orders.find(o => o.id.toString() === initialOrderId);
+        if (order) {
+          handleSelectOrder(order, true);
+        }
       }
     }
   }, [initialOrderId, orders]);
@@ -538,8 +541,13 @@ function MisCompras({ orders, user, initialOrderId }) {
     }
   }, [socket, selectedOrder]);
 
-  const handleSelectOrder = async (order) => {
+  const handleSelectOrder = async (order, skipUrlUpdate = false) => {
     setSelectedOrder(order);
+    
+    if (!skipUrlUpdate && searchParams.get('order_id') !== order.id.toString()) {
+      searchParams.set('order_id', order.id.toString());
+      setSearchParams(searchParams);
+    }
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/${order.id}/chat`, {
         headers: { 'Authorization': `Bearer ${user.accessToken}` }
@@ -630,7 +638,13 @@ function MisCompras({ orders, user, initialOrderId }) {
             {/* Header */}
             <div className="p-4 border-b border-outline-variant/30 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <div className="flex items-center gap-3">
-                <button onClick={() => setSelectedOrder(null)} className="md:hidden flex items-center justify-center p-1 hover:bg-surface-variant rounded-full transition-colors">
+                <button onClick={() => {
+                  setSelectedOrder(null);
+                  if (searchParams.has('order_id')) {
+                    searchParams.delete('order_id');
+                    setSearchParams(searchParams);
+                  }
+                }} className="md:hidden flex items-center justify-center p-1 hover:bg-surface-variant rounded-full transition-colors">
                   <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>

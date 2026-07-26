@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAlert } from '../../contexts/AlertContext';
+import { useSearchParams } from 'react-router-dom';
 
 function OrderManager({ user, initialOrderId }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { showAlert } = useAlert();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,6 @@ function OrderManager({ user, initialOrderId }) {
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef(null);
   const chatSectionRef = useRef(null);
-  const processedOrderId = useRef(null);
 
   useEffect(() => {
     fetchOrders();
@@ -68,11 +69,12 @@ function OrderManager({ user, initialOrderId }) {
   };
 
   useEffect(() => {
-    if (initialOrderId && orders.length > 0 && processedOrderId.current !== initialOrderId) {
-      const order = orders.find(o => o.id.toString() === initialOrderId);
-      if (order) {
-        handleSelectOrder(order);
-        processedOrderId.current = initialOrderId;
+    if (initialOrderId && orders.length > 0) {
+      if (!selectedOrder || selectedOrder.id.toString() !== initialOrderId) {
+        const order = orders.find(o => o.id.toString() === initialOrderId);
+        if (order) {
+          handleSelectOrder(order, true);
+        }
       }
     }
   }, [initialOrderId, orders]);
@@ -83,8 +85,13 @@ function OrderManager({ user, initialOrderId }) {
     }
   }, [socket, selectedOrder]);
 
-  const handleSelectOrder = async (order) => {
+  const handleSelectOrder = async (order, skipUrlUpdate = false) => {
     setSelectedOrder(order);
+    
+    if (!skipUrlUpdate && searchParams.get('order_id') !== order.id.toString()) {
+      searchParams.set('order_id', order.id.toString());
+      setSearchParams(searchParams);
+    }
     // Fetch messages for this order
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/${order.id}/chat`, {
@@ -204,7 +211,13 @@ function OrderManager({ user, initialOrderId }) {
             {/* Header del Chat */}
             <div className="p-4 border-b border-outline-variant/30 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
               <div className="flex items-center gap-3">
-                <button onClick={() => setSelectedOrder(null)} className="md:hidden flex items-center justify-center p-1 hover:bg-surface-variant rounded-full transition-colors">
+                <button onClick={() => {
+                  setSelectedOrder(null);
+                  if (searchParams.has('order_id')) {
+                    searchParams.delete('order_id');
+                    setSearchParams(searchParams);
+                  }
+                }} className="md:hidden flex items-center justify-center p-1 hover:bg-surface-variant rounded-full transition-colors">
                   <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>
