@@ -72,7 +72,7 @@ function Notifications({ user }) {
 
     // Redirigir según el tipo
     if (user.rol_id === 1) { // Admin
-      navigate(`/admin?tab=pedidos&order_id=${notif.referencia_id}`);
+      navigate(`/admin?tab=orders&order_id=${notif.referencia_id}`);
     } else { // Cliente
       navigate(`/profile?tab=compras&order_id=${notif.referencia_id}`);
     }
