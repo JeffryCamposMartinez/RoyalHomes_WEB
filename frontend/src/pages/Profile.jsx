@@ -527,11 +527,6 @@ function MisCompras({ orders, user }) {
       });
       if (res.ok) {
         setMessages(await res.json());
-        if (window.innerWidth < 768) {
-          setTimeout(() => {
-            chatSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }, 100);
-        }
       }
     } catch (err) {
       console.error('Error fetching messages', err);
@@ -561,9 +556,9 @@ function MisCompras({ orders, user }) {
   };
 
   return (
-    <div className="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden flex flex-col md:flex-row min-h-[600px] md:h-[600px] shadow-sm">
+    <div className="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden flex flex-col md:flex-row h-[calc(100dvh-140px)] md:h-[600px] shadow-sm">
       {/* Sidebar - Orders List */}
-      <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest h-[300px] md:h-auto shrink-0">
+      <div className={`w-full md:w-1/3 border-b md:border-b-0 md:border-r border-outline-variant/30 flex-col bg-surface-container-lowest h-full shrink-0 ${selectedOrder ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-outline-variant/30 bg-surface shrink-0">
           <h2 className="font-bold text-primary mb-2">Mis Compras</h2>
           <div className="relative w-full">
@@ -610,14 +605,19 @@ function MisCompras({ orders, user }) {
       </div>
 
       {/* Main Content - Chat & Details */}
-      <div ref={chatSectionRef} className="flex-1 flex flex-col bg-surface-container-lowest h-[500px] md:h-auto md:min-h-0">
+      <div className={`flex-1 flex-col bg-surface-container-lowest h-full ${selectedOrder ? 'flex' : 'hidden md:flex'}`}>
         {selectedOrder ? (
           <>
             {/* Header */}
             <div className="p-4 border-b border-outline-variant/30 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-              <div>
-                <h2 className="font-bold text-primary text-lg">Orden #{selectedOrder.id}</h2>
-                <span className="text-sm text-on-surface-variant font-medium">Estado: {selectedOrder.estado}</span>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setSelectedOrder(null)} className="md:hidden flex items-center justify-center p-1 hover:bg-surface-variant rounded-full transition-colors">
+                  <span className="material-symbols-outlined">arrow_back</span>
+                </button>
+                <div>
+                  <h2 className="font-bold text-primary text-lg">Orden #{selectedOrder.id}</h2>
+                  <span className="text-sm text-on-surface-variant font-medium">Estado: {selectedOrder.estado}</span>
+                </div>
               </div>
               
               <div className="flex items-center gap-2">

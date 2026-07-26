@@ -76,11 +76,6 @@ function OrderManager({ user }) {
       });
       if (res.ok) {
         setMessages(await res.json());
-        if (window.innerWidth < 768) {
-          setTimeout(() => {
-            chatSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }, 100);
-        }
       }
     } catch (err) {
       console.error('Error fetching messages', err);
@@ -148,9 +143,9 @@ function OrderManager({ user }) {
   }
 
   return (
-    <div className="min-h-[600px] md:h-[calc(100vh-140px)] flex flex-col md:flex-row bg-background overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm">
+    <div className="h-[calc(100dvh-130px)] md:h-[calc(100vh-140px)] flex flex-col md:flex-row bg-background overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm">
       {/* Sidebar - Lista de Pedidos */}
-      <div className="w-full md:w-1/3 max-w-[400px] border-b md:border-b-0 md:border-r border-outline-variant/30 flex flex-col bg-surface h-[300px] md:h-full shrink-0">
+      <div className={`w-full md:w-1/3 max-w-[400px] border-b md:border-b-0 md:border-r border-outline-variant/30 flex-col bg-surface h-full shrink-0 ${selectedOrder ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-outline-variant/30 bg-surface-container-lowest shrink-0">
           <h1 className="text-xl font-bold text-primary uppercase tracking-widest">Pedidos y Solicitudes</h1>
         </div>
@@ -187,14 +182,22 @@ function OrderManager({ user }) {
       </div>
 
       {/* Main Content - Detalle del Pedido / Chat */}
-      <div ref={chatSectionRef} className="flex-1 flex flex-col bg-surface-container-lowest h-[500px] md:h-auto md:min-h-0">
+      <div className={`flex-1 flex-col bg-surface-container-lowest h-full ${selectedOrder ? 'flex' : 'hidden md:flex'}`}>
         {selectedOrder ? (
           <>
             {/* Header del Chat */}
-            <div className="p-4 border-b border-outline-variant/30 bg-surface flex justify-between items-center shrink-0">
-              <div>
-                <h2 className="font-bold text-primary text-lg">Chat del Pedido #{selectedOrder.id}</h2>
-                <p className="text-sm text-on-surface-variant">Cliente: {selectedOrder.cliente} ({selectedOrder.cliente_email})</p>
+            <div className="p-4 border-b border-outline-variant/30 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setSelectedOrder(null)} className="md:hidden flex items-center justify-center p-1 hover:bg-surface-variant rounded-full transition-colors">
+                  <span className="material-symbols-outlined">arrow_back</span>
+                </button>
+                <div>
+                  <h2 className="text-xl font-bold text-primary">Chat del Pedido #{selectedOrder.id}</h2>
+                  <p className="text-sm text-on-surface-variant font-medium mt-1">
+                    Cliente: {selectedOrder.cliente}<br/>
+                    ({selectedOrder.cliente_email})
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 {/* Actions based on state */}
