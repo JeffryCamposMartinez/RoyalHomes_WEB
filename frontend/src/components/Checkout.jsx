@@ -247,8 +247,6 @@ function Checkout({ cart, clearCart }) {
               </label>
             </div>
 
-            </div>
-
             {metodoEntrega !== 'retiro_fisico' && (
               <>
                 <h2 className="font-headline-sm text-headline-sm text-primary mb-6 mt-8">Método de Coordinación</h2>
