@@ -13,6 +13,7 @@ function OrderManager({ user }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef(null);
+  const chatSectionRef = useRef(null);
 
   useEffect(() => {
     fetchOrders();
@@ -75,6 +76,11 @@ function OrderManager({ user }) {
       });
       if (res.ok) {
         setMessages(await res.json());
+        if (window.innerWidth < 768) {
+          setTimeout(() => {
+            chatSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
       }
     } catch (err) {
       console.error('Error fetching messages', err);
@@ -142,9 +148,9 @@ function OrderManager({ user }) {
   }
 
   return (
-    <div className="h-[calc(100vh-140px)] min-h-[600px] flex flex-col md:flex-row bg-background overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm">
+    <div className="min-h-[600px] md:h-[calc(100vh-140px)] flex flex-col md:flex-row bg-background overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm">
       {/* Sidebar - Lista de Pedidos */}
-      <div className="w-full md:w-1/3 max-w-[400px] border-r border-outline-variant/30 flex flex-col bg-surface h-full">
+      <div className="w-full md:w-1/3 max-w-[400px] border-b md:border-b-0 md:border-r border-outline-variant/30 flex flex-col bg-surface h-[300px] md:h-full shrink-0">
         <div className="p-4 border-b border-outline-variant/30 bg-surface-container-lowest shrink-0">
           <h1 className="text-xl font-bold text-primary uppercase tracking-widest">Pedidos y Solicitudes</h1>
         </div>
@@ -180,8 +186,8 @@ function OrderManager({ user }) {
         </div>
       </div>
 
-      {/* Main Content - Vista de Chat y Detalles */}
-      <div className="flex-1 flex flex-col bg-surface-container-lowest h-full">
+      {/* Main Content - Detalle del Pedido / Chat */}
+      <div ref={chatSectionRef} className="flex-1 flex flex-col bg-surface-container-lowest min-h-[500px] md:min-h-0">
         {selectedOrder ? (
           <>
             {/* Header del Chat */}

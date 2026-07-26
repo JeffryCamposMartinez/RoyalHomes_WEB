@@ -484,6 +484,7 @@ function MisCompras({ orders, user }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef(null);
+  const chatSectionRef = useRef(null);
   const { showAlert } = useAlert();
 
   const filteredOrders = orders.filter(o => 
@@ -526,6 +527,11 @@ function MisCompras({ orders, user }) {
       });
       if (res.ok) {
         setMessages(await res.json());
+        if (window.innerWidth < 768) {
+          setTimeout(() => {
+            chatSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
       }
     } catch (err) {
       console.error('Error fetching messages', err);
@@ -555,10 +561,10 @@ function MisCompras({ orders, user }) {
   };
 
   return (
-    <div className="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden flex flex-col md:flex-row h-[600px] shadow-sm">
+    <div className="bg-surface rounded-2xl border border-outline-variant/30 overflow-hidden flex flex-col md:flex-row min-h-[600px] md:h-[600px] shadow-sm">
       {/* Sidebar - Orders List */}
-      <div className="w-full md:w-1/3 border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest">
-        <div className="p-4 border-b border-outline-variant/30 bg-surface">
+      <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest h-[300px] md:h-auto shrink-0">
+        <div className="p-4 border-b border-outline-variant/30 bg-surface shrink-0">
           <h2 className="font-bold text-primary mb-2">Mis Compras</h2>
           <div className="relative w-full">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
@@ -604,7 +610,7 @@ function MisCompras({ orders, user }) {
       </div>
 
       {/* Main Content - Chat & Details */}
-      <div className="flex-1 flex flex-col bg-surface-container-lowest">
+      <div ref={chatSectionRef} className="flex-1 flex flex-col bg-surface-container-lowest min-h-[500px] md:min-h-0">
         {selectedOrder ? (
           <>
             {/* Header */}
