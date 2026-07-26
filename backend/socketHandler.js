@@ -48,10 +48,23 @@ module.exports = (io) => {
 
           // Crear notificación para cada destinatario
           for (let destId of destinatarios) {
-            await db.query(
-              'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
-              [destId, 'mensaje', `Nuevo mensaje en el Pedido #${pedidoId}`, pedidoId]
+            // Revisar si ya hay una notificación no leída para este pedido y tipo
+            const [existing] = await db.query(
+              'SELECT id FROM notificaciones WHERE usuario_id = ? AND tipo = ? AND referencia_id = ? AND leida = FALSE',
+              [destId, 'mensaje', pedidoId]
             );
+
+            if (existing.length > 0) {
+              await db.query(
+                'UPDATE notificaciones SET creado_en = CURRENT_TIMESTAMP, mensaje = ? WHERE id = ?',
+                [`Nuevos mensajes en el Pedido #${pedidoId}`, existing[0].id]
+              );
+            } else {
+              await db.query(
+                'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
+                [destId, 'mensaje', `Nuevo mensaje en el Pedido #${pedidoId}`, pedidoId]
+              );
+            }
             // Emitir evento para actualizar campanita en tiempo real
             io.emit(`nueva_notificacion_${destId}`);
           }
