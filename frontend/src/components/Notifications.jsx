@@ -111,7 +111,7 @@ function Notifications({ user }) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-4 w-72 sm:w-80 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden flex flex-col z-50 animate-in fade-in slide-in-from-top-2 max-h-[80vh]">
+        <div className="fixed sm:absolute top-[70px] sm:top-full left-1/2 sm:left-auto -translate-x-1/2 sm:translate-x-0 sm:right-0 mt-0 sm:mt-4 w-[95vw] sm:w-80 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden flex flex-col z-50 animate-in fade-in slide-in-from-top-2 max-h-[80vh] sm:max-h-[80vh]">
           <div className="p-3 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-lowest">
             <h3 className="font-bold text-sm text-primary uppercase tracking-widest">Notificaciones</h3>
             {unreadCount > 0 && (

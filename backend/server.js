@@ -73,7 +73,7 @@ async function runMigrations() {
     await db.query(`
       CREATE TABLE IF NOT EXISTS notificaciones (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        usuario_id INT NOT NULL,
+        usuario_id INT UNSIGNED NOT NULL,
         mensaje TEXT NOT NULL,
         tipo VARCHAR(50) DEFAULT 'info',
         leida BOOLEAN DEFAULT FALSE,
