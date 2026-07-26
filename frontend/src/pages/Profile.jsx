@@ -103,7 +103,7 @@ function Profile({ user, onUpdateUser }) {
         <main className="flex-1 min-w-0">
           {activeTab === 'datos' && <MisDatos profile={profileData} setProfile={setProfileData} user={user} onUpdateUser={onUpdateUser} showAlert={showAlert} />}
           {activeTab === 'direcciones' && <MisDirecciones profile={profileData} setProfile={setProfileData} user={user} showAlert={showAlert} />}
-          {activeTab === 'compras' && <MisCompras orders={orders} user={user} />}
+          {activeTab === 'compras' && <MisCompras orders={orders} user={user} initialOrderId={searchParams.get('order_id')} />}
         </main>
 
       </div>
@@ -477,7 +477,7 @@ function MisDirecciones({ profile, setProfile, user, showAlert }) {
   );
 }
 
-function MisCompras({ orders, user }) {
+function MisCompras({ orders, user, initialOrderId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [socket, setSocket] = useState(null);
@@ -490,6 +490,16 @@ function MisCompras({ orders, user }) {
   const filteredOrders = orders.filter(o => 
     o.id.toString().includes(searchTerm)
   );
+
+  // Auto-seleccionar si viene order_id en la URL
+  useEffect(() => {
+    if (initialOrderId && orders.length > 0 && !selectedOrder) {
+      const order = orders.find(o => o.id.toString() === initialOrderId);
+      if (order) {
+        handleSelectOrder(order);
+      }
+    }
+  }, [initialOrderId, orders, selectedOrder]);
 
   useEffect(() => {
     const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Notifications from './Notifications';
 
 function Navbar({ cartCount, user, onLogout }) {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ function Navbar({ cartCount, user, onLogout }) {
           </Link>
           
           <div className="flex-1 flex justify-end items-center gap-1 sm:gap-4 relative">
+            {user && <Notifications user={user} />}
             {user ? (
               <div 
                 className="relative flex items-center gap-1 sm:gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" 

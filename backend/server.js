@@ -8,9 +8,31 @@ const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const billingRoutes = require('./routes/billingRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Configurar servidor HTTP y Socket.io tempranamente para inyectarlo en req
+const http = require('http');
+const { Server } = require('socket.io');
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [
+      'http://localhost:5173', 
+      'http://localhost:4173',
+      'https://royalhomes.cl', 
+      'https://www.royalhomes.cl'
+    ],
+    methods: ['GET', 'POST']
+  }
+});
+
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 app.use(cors({
   origin: [
@@ -30,6 +52,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Servir archivos estáticos de la carpeta uploads y Publicidad
 const path = require('path');
@@ -47,23 +70,6 @@ async function runMigrations() {
   }
 }
 runMigrations();
-
-// Configurar servidor HTTP y Socket.io
-const http = require('http');
-const { Server } = require('socket.io');
-
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: [
-      'http://localhost:5173', 
-      'http://localhost:4173',
-      'https://royalhomes.cl', 
-      'https://www.royalhomes.cl'
-    ],
-    methods: ['GET', 'POST']
-  }
-});
 
 // Importar lógica de Sockets
 require('./socketHandler')(io);

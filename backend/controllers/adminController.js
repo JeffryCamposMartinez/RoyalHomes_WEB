@@ -322,6 +322,27 @@ exports.updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { estado_id } = req.body;
     await db.query('UPDATE pedidos SET estado_id = ? WHERE id = ?', [estado_id, id]);
+    
+    // Obtener información del cliente y estado
+    const [pedidoInfo] = await db.query('SELECT usuario_id FROM pedidos WHERE id = ?', [id]);
+    const [estadoInfo] = await db.query('SELECT nombre FROM estados_pedido WHERE id = ?', [estado_id]);
+    
+    if (pedidoInfo.length > 0 && estadoInfo.length > 0) {
+      const clienteId = pedidoInfo[0].usuario_id;
+      const estadoNombre = estadoInfo[0].nombre;
+      
+      // Crear notificación
+      await db.query(
+        'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
+        [clienteId, 'pedido_actualizado', `El estado de tu Pedido #${id} se actualizó a: ${estadoNombre}`, id]
+      );
+      
+      // Emitir notificación
+      if (req.io) {
+        req.io.emit(`nueva_notificacion_${clienteId}`);
+      }
+    }
+    
     res.json({ message: 'Order status updated' });
   } catch (error) {
     console.error(error);

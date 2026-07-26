@@ -31,6 +31,31 @@ module.exports = (io) => {
 
         // Emitir mensaje a todos en la sala
         io.to(`order_${pedidoId}`).emit('receive_message', nuevoMensaje);
+        // Obtener datos del pedido para saber a quién notificar
+        const [pedidoInfo] = await db.query('SELECT usuario_id FROM pedidos WHERE id = ?', [pedidoId]);
+        if (pedidoInfo.length > 0) {
+          const clienteId = pedidoInfo[0].usuario_id;
+          
+          let destinatarios = [];
+          // Si el remitente es el cliente, notificar a los admins
+          if (remitenteId === clienteId) {
+            const [admins] = await db.query('SELECT id FROM usuarios WHERE rol_id = 1');
+            destinatarios = admins.map(a => a.id);
+          } else {
+            // Si el remitente es admin, notificar al cliente
+            destinatarios = [clienteId];
+          }
+
+          // Crear notificación para cada destinatario
+          for (let destId of destinatarios) {
+            await db.query(
+              'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
+              [destId, 'mensaje', `Nuevo mensaje en el Pedido #${pedidoId}`, pedidoId]
+            );
+            // Emitir evento para actualizar campanita en tiempo real
+            io.emit(`nueva_notificacion_${destId}`);
+          }
+        }
       } catch (error) {
         console.error('Error al guardar el mensaje:', error);
       }
@@ -52,6 +77,17 @@ module.exports = (io) => {
           // Cambiar estado a Pago Habilitado (8)
           await db.query('UPDATE pedidos SET estado_id = 8 WHERE id = ?', [pedidoId]);
           io.to(`order_${pedidoId}`).emit('trato_cerrado_completado');
+
+          // Notificar al cliente
+          const [pedidoInfo] = await db.query('SELECT usuario_id FROM pedidos WHERE id = ?', [pedidoId]);
+          if (pedidoInfo.length > 0) {
+             const clienteId = pedidoInfo[0].usuario_id;
+             await db.query(
+                'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
+                [clienteId, 'trato_cerrado', `¡El trato del Pedido #${pedidoId} se ha cerrado!`, pedidoId]
+             );
+             io.emit(`nueva_notificacion_${clienteId}`);
+          }
         } else {
           io.to(`order_${pedidoId}`).emit('trato_actualizado', pedido);
         }

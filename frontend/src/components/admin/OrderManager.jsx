@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAlert } from '../../contexts/AlertContext';
 
-function OrderManager({ user }) {
+function OrderManager({ user, initialOrderId }) {
   const { showAlert } = useAlert();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +63,15 @@ function OrderManager({ user }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (initialOrderId && orders.length > 0 && !selectedOrder) {
+      const order = orders.find(o => o.id.toString() === initialOrderId);
+      if (order) {
+        handleSelectOrder(order);
+      }
+    }
+  }, [initialOrderId, orders, selectedOrder]);
 
   const handleSelectOrder = async (order) => {
     setSelectedOrder(order);

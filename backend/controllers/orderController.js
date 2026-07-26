@@ -30,6 +30,19 @@ exports.createOrder = async (req, res) => {
     }
     
     await connection.commit();
+    
+    // Notificar a todos los admins
+    const [admins] = await connection.query('SELECT id FROM usuarios WHERE rol_id = 1');
+    for (const admin of admins) {
+      await connection.query(
+        'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
+        [admin.id, 'nuevo_pedido', `Nueva solicitud de Pedido #${orderId}`, orderId]
+      );
+      if (req.io) {
+        req.io.emit(`nueva_notificacion_${admin.id}`);
+      }
+    }
+    
     res.status(201).json({ message: 'Order created as request', orderId });
   } catch (error) {
     await connection.rollback();

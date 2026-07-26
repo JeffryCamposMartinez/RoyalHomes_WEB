@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import ProductManager from '../components/admin/ProductManager';
 import CategoryManager from '../components/admin/CategoryManager';
 import StoreLayoutManager from '../components/admin/StoreLayoutManager';
@@ -10,11 +10,15 @@ import BillingManager from '../components/admin/BillingManager';
 
 function AdminLayout({ user }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialTab = searchParams.get('tab') || 'dashboard';
+  
   const [metrics, setMetrics] = useState({ totalRevenue: 0, totalOrders: 0, activeUsers: 0, lowStock: 0 });
   const [staff, setStaff] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [isSiteOpen, setIsSiteOpen] = useState(false);
@@ -53,6 +57,12 @@ function AdminLayout({ user }) {
     };
     fetchData();
   }, [user, navigate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab) setActiveTab(tab);
+  }, [location.search]);
 
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center font-display-lg text-primary w-full">Cargando Panel...</div>;
@@ -414,7 +424,7 @@ function AdminLayout({ user }) {
         ) : activeTab === 'billing' ? (
           <BillingManager user={user} />
         ) : activeTab === 'orders' ? (
-          <OrderManager user={user} />
+          <OrderManager user={user} initialOrderId={searchParams.get('order_id')} />
         ) : null}
       </main>
 
