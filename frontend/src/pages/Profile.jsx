@@ -511,9 +511,12 @@ function MisCompras({ orders, user, initialOrderId }) {
     });
 
     newSocket.on('trato_actualizado', (pedido) => {
-      if (selectedOrder && selectedOrder.id === pedido.id) {
-        setSelectedOrder(prev => ({ ...prev, ...pedido }));
-      }
+      setSelectedOrder(prev => {
+        if (prev && prev.id === pedido.id) {
+          return { ...prev, ...pedido };
+        }
+        return prev;
+      });
       showAlert('El estado del trato ha sido actualizado', 'info');
     });
 
@@ -524,13 +527,16 @@ function MisCompras({ orders, user, initialOrderId }) {
 
     setSocket(newSocket);
     return () => newSocket.disconnect();
-  }, [user.accessToken, showAlert, selectedOrder]);
+  }, [user.accessToken, showAlert]);
+
+  useEffect(() => {
+    if (socket && selectedOrder) {
+      socket.emit('join_order_room', selectedOrder.id);
+    }
+  }, [socket, selectedOrder]);
 
   const handleSelectOrder = async (order) => {
     setSelectedOrder(order);
-    if (socket) {
-      socket.emit('join_order_room', order.id);
-    }
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/${order.id}/chat`, {
         headers: { 'Authorization': `Bearer ${user.accessToken}` }

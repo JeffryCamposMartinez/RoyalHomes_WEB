@@ -29,9 +29,10 @@ function OrderManager({ user, initialOrderId }) {
 
     newSocket.on('trato_actualizado', (pedido) => {
       fetchOrders();
-      if (selectedOrder && selectedOrder.id === pedido.id) {
-        setSelectedOrder(prev => ({ ...prev, ...pedido }));
-      }
+      setSelectedOrder(prev => {
+        if (prev && prev.id === pedido.id) return { ...prev, ...pedido };
+        return prev;
+      });
       showAlert('El estado del trato ha sido actualizado', 'info');
     });
 
@@ -73,11 +74,14 @@ function OrderManager({ user, initialOrderId }) {
     }
   }, [initialOrderId, orders, selectedOrder]);
 
+  useEffect(() => {
+    if (socket && selectedOrder) {
+      socket.emit('join_order_room', selectedOrder.id);
+    }
+  }, [socket, selectedOrder]);
+
   const handleSelectOrder = async (order) => {
     setSelectedOrder(order);
-    if (socket) {
-      socket.emit('join_order_room', order.id);
-    }
     // Fetch messages for this order
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/orders/${order.id}/chat`, {
