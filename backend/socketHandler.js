@@ -48,21 +48,21 @@ module.exports = (io) => {
 
           // Crear notificación para cada destinatario
           for (let destId of destinatarios) {
-            // Revisar si ya hay una notificación no leída para este pedido y tipo
-            const [existing] = await db.query(
-              'SELECT id FROM notificaciones WHERE usuario_id = ? AND tipo = ? AND referencia_id = ? AND leida = FALSE',
-              [destId, 'mensaje', pedidoId]
+            // Intentar actualizar primero para evitar race conditions
+            const [updateResult] = await db.query(
+              'UPDATE notificaciones SET creado_en = CURRENT_TIMESTAMP, mensaje = ? WHERE usuario_id = ? AND tipo = ? AND referencia_id = ? AND leida = 0',
+              [`Nuevos mensajes en el Pedido #${pedidoId}`, destId, 'mensaje', pedidoId]
             );
 
-            if (existing.length > 0) {
+            // Si no había notificación no leída, insertamos una nueva de forma atómica
+            if (updateResult.affectedRows === 0) {
               await db.query(
-                'UPDATE notificaciones SET creado_en = CURRENT_TIMESTAMP, mensaje = ? WHERE id = ?',
-                [`Nuevos mensajes en el Pedido #${pedidoId}`, existing[0].id]
-              );
-            } else {
-              await db.query(
-                'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
-                [destId, 'mensaje', `Nuevo mensaje en el Pedido #${pedidoId}`, pedidoId]
+                `INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id)
+                 SELECT ?, ?, ?, ? FROM DUAL
+                 WHERE NOT EXISTS (
+                   SELECT 1 FROM notificaciones WHERE usuario_id = ? AND tipo = ? AND referencia_id = ? AND leida = 0
+                 )`,
+                [destId, 'mensaje', `Nuevo mensaje en el Pedido #${pedidoId}`, pedidoId, destId, 'mensaje', pedidoId]
               );
             }
             // Emitir evento para actualizar campanita en tiempo real
