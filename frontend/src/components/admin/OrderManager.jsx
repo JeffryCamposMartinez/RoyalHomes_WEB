@@ -14,6 +14,7 @@ function OrderManager({ user, initialOrderId }) {
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef(null);
   const chatSectionRef = useRef(null);
+  const processedOrderId = useRef(null);
 
   useEffect(() => {
     fetchOrders();
@@ -67,13 +68,14 @@ function OrderManager({ user, initialOrderId }) {
   };
 
   useEffect(() => {
-    if (initialOrderId && orders.length > 0 && !selectedOrder) {
+    if (initialOrderId && orders.length > 0 && processedOrderId.current !== initialOrderId) {
       const order = orders.find(o => o.id.toString() === initialOrderId);
       if (order) {
         handleSelectOrder(order);
+        processedOrderId.current = initialOrderId;
       }
     }
-  }, [initialOrderId, orders, selectedOrder]);
+  }, [initialOrderId, orders]);
 
   useEffect(() => {
     if (socket && selectedOrder) {

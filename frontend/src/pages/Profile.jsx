@@ -485,6 +485,7 @@ function MisCompras({ orders, user, initialOrderId }) {
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef(null);
   const chatSectionRef = useRef(null);
+  const processedOrderId = useRef(null);
   const { showAlert } = useAlert();
 
   const filteredOrders = orders.filter(o => 
@@ -493,13 +494,14 @@ function MisCompras({ orders, user, initialOrderId }) {
 
   // Auto-seleccionar si viene order_id en la URL
   useEffect(() => {
-    if (initialOrderId && orders.length > 0 && !selectedOrder) {
+    if (initialOrderId && orders.length > 0 && processedOrderId.current !== initialOrderId) {
       const order = orders.find(o => o.id.toString() === initialOrderId);
       if (order) {
         handleSelectOrder(order);
+        processedOrderId.current = initialOrderId;
       }
     }
-  }, [initialOrderId, orders, selectedOrder]);
+  }, [initialOrderId, orders]);
 
   useEffect(() => {
     const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
