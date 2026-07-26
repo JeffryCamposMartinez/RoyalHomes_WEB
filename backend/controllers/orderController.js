@@ -57,7 +57,7 @@ exports.createOrder = async (req, res) => {
     
     // Si es direct_payment, crear preferencia de MercadoPago
     if (direct_payment) {
-      const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+      const client = new MercadoPagoConfig({ accessToken: process.env.MP_CLIENT_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN });
       const preference = new Preference(client);
 
       const frontendUrl = process.env.FRONTEND_URL || "https://royalhomes.cl";
@@ -168,7 +168,7 @@ exports.receiveWebhook = async (req, res) => {
 
   if (topic === 'payment' && paymentId) {
     try {
-      const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+      const client = new MercadoPagoConfig({ accessToken: process.env.MP_CLIENT_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN });
       const payment = new Payment(client);
       const paymentData = await payment.get({ id: paymentId });
 
