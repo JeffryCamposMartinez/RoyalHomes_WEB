@@ -7,6 +7,7 @@ import ContactSettingsManager from '../components/admin/ContactSettingsManager';
 import OrderManager from '../components/admin/OrderManager';
 import ImageManager from '../components/admin/ImageManager';
 import BillingManager from '../components/admin/BillingManager';
+import Notifications from '../components/Notifications';
 
 function AdminLayout({ user }) {
   const navigate = useNavigate();
@@ -78,7 +79,41 @@ function AdminLayout({ user }) {
         <div className="flex items-center">
           <img src="/images/logo/logo_solo_texto.png" alt="Royal Home" className="h-4 object-contain" />
         </div>
-        <div className="w-10"></div> {/* Spacer for centering */}
+        <div className="flex items-center gap-2 relative">
+          <Notifications user={user} />
+          <div 
+            className="relative flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" 
+            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            onBlur={() => setTimeout(() => setIsUserMenuOpen(false), 200)}
+            tabIndex={0}
+          >
+            <span className="material-symbols-outlined text-[20px]">account_circle</span>
+            <span className="material-symbols-outlined text-[16px] transition-transform duration-200">expand_more</span>
+            
+            {isUserMenuOpen && (
+              <div className="absolute top-full right-0 mt-4 w-48 bg-surface border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden flex flex-col z-50 animate-in fade-in slide-in-from-top-2">
+                <Link 
+                  to="/profile"
+                  className="w-full px-4 py-3 text-left font-label-md text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2 transition-colors uppercase tracking-widest border-b border-outline-variant/20"
+                >
+                  <span className="material-symbols-outlined text-[18px]">person</span>
+                  Mi Perfil
+                </Link>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('user');
+                    sessionStorage.removeItem('user');
+                    window.location.href = '/login';
+                  }}
+                  className="w-full px-4 py-3 text-left font-label-md text-sm text-error hover:bg-error/10 flex items-center gap-2 transition-colors uppercase tracking-widest"
+                >
+                  <span className="material-symbols-outlined text-[18px]">logout</span>
+                  Salir
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* Mobile Menu Overlay */}
@@ -181,16 +216,17 @@ function AdminLayout({ user }) {
       {/* Main Content Canvas */}
       <main className="flex-1 px-container-margin-mobile md:px-container-margin-desktop py-6 md:py-10 overflow-y-auto w-full relative">
         
-        {/* Top Right User Menu */}
-        <div className="flex justify-end items-center mb-6 md:mb-8 z-50">
+        {/* Top Right User Menu (Desktop) */}
+        <div className="hidden md:flex justify-end items-center mb-6 md:mb-8 z-50 gap-4">
+          <Notifications user={user} />
           <div 
-            className="relative flex items-center gap-1 sm:gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" 
+            className="relative flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer" 
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             onBlur={() => setTimeout(() => setIsUserMenuOpen(false), 200)}
             tabIndex={0}
           >
-            <span className="material-symbols-outlined text-[20px] sm:text-[24px]">account_circle</span>
-            <span className="font-label-md text-[10px] sm:text-sm whitespace-nowrap">Hola, {user?.nombre?.split(' ')[0]}</span>
+            <span className="material-symbols-outlined text-[24px]">account_circle</span>
+            <span className="font-label-md text-sm whitespace-nowrap">Hola, {user?.nombre?.split(' ')[0]}</span>
             <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`}>expand_more</span>
             
             {isUserMenuOpen && (
