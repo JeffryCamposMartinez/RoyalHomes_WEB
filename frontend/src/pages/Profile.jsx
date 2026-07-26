@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAlert } from '../contexts/AlertContext';
 import AdSenseBlock from '../components/AdSenseBlock';
 import { io } from 'socket.io-client';
 
 function Profile({ user, onUpdateUser }) {
+  const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const initialTab = searchParams.get('tab') || 'datos';
@@ -13,6 +14,10 @@ function Profile({ user, onUpdateUser }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showAlert } = useAlert();
+
+  const handleTabChange = (tabName) => {
+    navigate(`/profile?tab=${tabName}`);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -61,21 +66,21 @@ function Profile({ user, onUpdateUser }) {
         <aside className="w-full lg:w-64 shrink-0">
           <nav className="flex flex-col gap-2">
             <button 
-              onClick={() => setActiveTab('datos')}
+              onClick={() => handleTabChange('datos')}
               className={`flex items-center gap-3 w-full text-left p-4 rounded-xl font-label-md uppercase tracking-widest transition-colors ${activeTab === 'datos' ? 'bg-primary/5 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-variant/30'}`}
             >
               <span className="material-symbols-outlined text-[20px]">person</span>
               Mis datos
             </button>
             <button 
-              onClick={() => setActiveTab('direcciones')}
+              onClick={() => handleTabChange('direcciones')}
               className={`flex items-center gap-3 w-full text-left p-4 rounded-xl font-label-md uppercase tracking-widest transition-colors ${activeTab === 'direcciones' ? 'bg-primary/5 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-variant/30'}`}
             >
               <span className="material-symbols-outlined text-[20px]">location_on</span>
               Mis direcciones
             </button>
             <button 
-              onClick={() => setActiveTab('compras')}
+              onClick={() => handleTabChange('compras')}
               className={`flex items-center gap-3 w-full text-left p-4 rounded-xl font-label-md uppercase tracking-widest transition-colors ${activeTab === 'compras' ? 'bg-primary/5 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-variant/30'}`}
             >
               <span className="material-symbols-outlined text-[20px]">shopping_bag</span>

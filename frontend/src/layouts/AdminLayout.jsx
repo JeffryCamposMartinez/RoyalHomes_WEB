@@ -25,6 +25,11 @@ function AdminLayout({ user }) {
   const [isSiteOpen, setIsSiteOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  const handleTabChange = (tabName) => {
+    navigate(`/admin?tab=${tabName}`);
+    setIsMobileMenuOpen(false);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -133,7 +138,7 @@ function AdminLayout({ user }) {
           <p className="font-caption text-caption text-on-surface-variant mt-2 uppercase tracking-widest">Admin Portal</p>
         </div>
         <nav className="flex flex-col gap-2 flex-1 mt-12 md:mt-0">
-          <button onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'dashboard' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+          <button onClick={() => handleTabChange('dashboard')} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'dashboard' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
             <span className={`material-symbols-outlined ${activeTab === 'dashboard' ? 'fill' : ''}`}>dashboard</span>
             <span className="font-label-md text-label-md">Dashboard</span>
           </button>
@@ -147,10 +152,10 @@ function AdminLayout({ user }) {
               <span className="material-symbols-outlined transition-transform duration-200" style={{ transform: isCatalogOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
             </button>
             <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ${isCatalogOpen ? 'max-h-40 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}>
-              <button onClick={() => { setActiveTab('products'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'products' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+              <button onClick={() => handleTabChange('products')} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'products' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
                 <span className="font-label-md text-sm">Productos</span>
               </button>
-              <button onClick={() => { setActiveTab('categories'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'categories' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+              <button onClick={() => handleTabChange('categories')} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'categories' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
                 <span className="font-label-md text-sm">Categorías</span>
               </button>
             </div>
@@ -166,13 +171,13 @@ function AdminLayout({ user }) {
               <span className="material-symbols-outlined transition-transform duration-200" style={{ transform: isSiteOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>expand_more</span>
             </button>
             <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 ${isSiteOpen ? 'max-h-60 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}>
-              <button onClick={() => { setActiveTab('store_layout'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'store_layout' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+              <button onClick={() => handleTabChange('store_layout')} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'store_layout' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
                 <span className="font-label-md text-sm">Diseño Inicio</span>
               </button>
-              <button onClick={() => { setActiveTab('contact_settings'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'contact_settings' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+              <button onClick={() => handleTabChange('contact_settings')} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'contact_settings' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
                 <span className="font-label-md text-sm">Redes y Contacto</span>
               </button>
-              <button onClick={() => { setActiveTab('images'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'images' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+              <button onClick={() => handleTabChange('images')} className={`flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-lg font-bold group transition-colors ${activeTab === 'images' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
                 <span className="font-label-md text-sm">Multimedia</span>
               </button>
             </div>
@@ -185,11 +190,11 @@ function AdminLayout({ user }) {
             <span className="material-symbols-outlined">bar_chart</span>
             <span className="font-label-md text-label-md">Reportes</span>
           </button>
-          <button onClick={() => { setActiveTab('orders'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'orders' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+          <button onClick={() => handleTabChange('orders')} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'orders' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
             <span className={`material-symbols-outlined ${activeTab === 'orders' ? 'fill' : ''}`}>shopping_cart</span>
             <span className="font-label-md text-label-md">Pedidos</span>
           </button>
-          <button onClick={() => { setActiveTab('billing'); setIsMobileMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'billing' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
+          <button onClick={() => handleTabChange('billing')} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold group transition-colors ${activeTab === 'billing' ? 'bg-surface-container-low text-primary' : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-primary'}`}>
             <span className={`material-symbols-outlined ${activeTab === 'billing' ? 'fill' : ''}`}>payments</span>
             <span className="font-label-md text-label-md">Suscripción</span>
           </button>
@@ -466,7 +471,7 @@ function AdminLayout({ user }) {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden shrink-0 w-full z-40 flex justify-around items-center px-4 py-3 bg-surface/95 backdrop-blur-xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)] border-t border-outline-variant/30">
-        <button onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }} className={`flex flex-col items-center justify-center transition-colors ${activeTab === 'dashboard' ? 'text-primary' : 'text-on-surface-variant opacity-70'}`}>
+        <button onClick={() => handleTabChange('dashboard')} className={`flex flex-col items-center justify-center transition-colors ${activeTab === 'dashboard' ? 'text-primary' : 'text-on-surface-variant opacity-70'}`}>
           <span className={`material-symbols-outlined text-[24px] ${activeTab === 'dashboard' ? 'fill' : ''}`}>dashboard</span>
           <span className="font-label-md text-[10px] uppercase tracking-widest mt-1">Inicio</span>
         </button>
