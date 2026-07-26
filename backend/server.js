@@ -68,6 +68,24 @@ async function runMigrations() {
   } catch (e) {
     if (e.code !== 'ER_DUP_FIELDNAME') console.error("Error en migración productos:", e);
   }
+
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS notificaciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        mensaje TEXT NOT NULL,
+        tipo VARCHAR(50) DEFAULT 'info',
+        leida BOOLEAN DEFAULT FALSE,
+        referencia_id INT NULL,
+        creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log("Migración exitosa: Tabla 'notificaciones' verificada/creada.");
+  } catch (e) {
+    console.error("Error en migración notificaciones:", e);
+  }
 }
 runMigrations();
 
