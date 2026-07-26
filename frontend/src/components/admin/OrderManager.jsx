@@ -20,7 +20,8 @@ function OrderManager({ user, initialOrderId }) {
     
     // Setup Socket.io
     const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
-      auth: { token: user.accessToken }
+      auth: { token: user.accessToken },
+      forceNew: true
     });
 
     newSocket.on('receive_message', (msg) => {

@@ -15,7 +15,8 @@ function Notifications({ user }) {
     fetchNotifications();
 
     const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
-      auth: { token: user.accessToken }
+      auth: { token: user.accessToken },
+      forceNew: true
     });
 
     newSocket.on(`nueva_notificacion_${user.id}`, () => {
