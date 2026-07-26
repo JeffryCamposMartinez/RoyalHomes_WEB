@@ -111,18 +111,24 @@ function Checkout({ cart, clearCart }) {
           shippingInfo: metodoEntrega === 'retiro_fisico' ? null : selectedAddress,
           total,
           metodo_entrega: metodoEntrega,
-          metodo_contacto: metodoContacto,
-          whatsapp_contacto: metodoContacto === 'whatsapp' ? whatsappNumber : null
+          metodo_contacto: metodoEntrega === 'retiro_fisico' ? null : metodoContacto,
+          whatsapp_contacto: metodoContacto === 'whatsapp' && metodoEntrega !== 'retiro_fisico' ? whatsappNumber : null,
+          direct_payment: metodoEntrega === 'retiro_fisico'
         })
       });
 
       if (res.ok) {
         const data = await res.json();
+        if (data.init_point) {
+          window.location.href = data.init_point;
+          return;
+        }
         showAlert(`¡Solicitud enviada! Orden #${data.orderId}. El vendedor se pondrá en contacto pronto.`, 'success');
         clearCart();
         navigate('/profile'); // Redirect to profile to see the order
       } else {
-        showAlert('Hubo un problema al procesar la orden. Asegúrate de haber iniciado sesión.', 'error');
+        const errorData = await res.json().catch(() => null);
+        showAlert(errorData?.error || 'Hubo un problema al procesar la orden. Asegúrate de haber iniciado sesión.', 'error');
       }
     } catch (err) {
       console.error(err);
@@ -241,31 +247,37 @@ function Checkout({ cart, clearCart }) {
               </label>
             </div>
 
-            <h2 className="font-headline-sm text-headline-sm text-primary mb-6 mt-8">Método de Coordinación</h2>
-            <p className="text-sm text-on-surface-variant mb-4">El pago se habilitará luego de que coordinemos los detalles del pedido.</p>
-
-            <div className="flex flex-col gap-3 mb-6">
-              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoContacto === 'whatsapp' ? 'border-[#25D366] bg-[#25D366]/5' : 'border-outline-variant/50'}`}>
-                <input type="radio" name="contacto" value="whatsapp" checked={metodoContacto === 'whatsapp'} onChange={(e) => setMetodoContacto(e.target.value)} className="w-4 h-4 text-[#25D366]" />
-                <div className="flex-1">
-                  <span className="font-bold text-[#25D366] text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">forum</span> WhatsApp</span>
-                </div>
-              </label>
-
-              {metodoContacto === 'whatsapp' && (
-                <div className="ml-4 mb-2">
-                  <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Tu número de WhatsApp *</label>
-                  <input type="text" placeholder="+56 9 1234 5678" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full bg-surface-container border border-outline-variant/50 rounded-lg p-3 text-sm focus:border-[#25D366] focus:outline-none transition-colors" />
-                </div>
-              )}
-
-              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoContacto === 'chat_nativo' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
-                <input type="radio" name="contacto" value="chat_nativo" checked={metodoContacto === 'chat_nativo'} onChange={(e) => setMetodoContacto(e.target.value)} className="w-4 h-4 text-primary" />
-                <div>
-                  <span className="font-bold text-primary text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">chat</span> Chat en la Página</span>
-                </div>
-              </label>
             </div>
+
+            {metodoEntrega !== 'retiro_fisico' && (
+              <>
+                <h2 className="font-headline-sm text-headline-sm text-primary mb-6 mt-8">Método de Coordinación</h2>
+                <p className="text-sm text-on-surface-variant mb-4">El pago se habilitará luego de que coordinemos los detalles del pedido.</p>
+
+                <div className="flex flex-col gap-3 mb-6">
+                  <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoContacto === 'whatsapp' ? 'border-[#25D366] bg-[#25D366]/5' : 'border-outline-variant/50'}`}>
+                    <input type="radio" name="contacto" value="whatsapp" checked={metodoContacto === 'whatsapp'} onChange={(e) => setMetodoContacto(e.target.value)} className="w-4 h-4 text-[#25D366]" />
+                    <div className="flex-1">
+                      <span className="font-bold text-[#25D366] text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">forum</span> WhatsApp</span>
+                    </div>
+                  </label>
+
+                  {metodoContacto === 'whatsapp' && (
+                    <div className="ml-4 mb-2">
+                      <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Tu número de WhatsApp *</label>
+                      <input type="text" placeholder="+56 9 1234 5678" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full bg-surface-container border border-outline-variant/50 rounded-lg p-3 text-sm focus:border-[#25D366] focus:outline-none transition-colors" />
+                    </div>
+                  )}
+
+                  <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoContacto === 'chat_nativo' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
+                    <input type="radio" name="contacto" value="chat_nativo" checked={metodoContacto === 'chat_nativo'} onChange={(e) => setMetodoContacto(e.target.value)} className="w-4 h-4 text-primary" />
+                    <div>
+                      <span className="font-bold text-primary text-sm uppercase tracking-widest flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">chat</span> Chat en la Página</span>
+                    </div>
+                  </label>
+                </div>
+              </>
+            )}
 
             <div className="h-px bg-outline-variant/30 my-8"></div>
 
@@ -291,7 +303,7 @@ function Checkout({ cart, clearCart }) {
               disabled={processing}
               className={`w-full py-4 rounded-full font-label-md text-label-md uppercase tracking-widest transition-all ${processing ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90 shadow-md hover:scale-[1.02]'}`}
             >
-              {processing ? 'Enviando...' : 'Enviar Solicitud de Compra'}
+              {processing ? (metodoEntrega === 'retiro_fisico' ? 'Redirigiendo...' : 'Enviando...') : (metodoEntrega === 'retiro_fisico' ? 'Pagar Ahora' : 'Enviar Solicitud de Compra')}
             </button>
           </div>
         </div>

@@ -1,7 +1,8 @@
 const db = require('../config/db');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 
 exports.createOrder = async (req, res) => {
-  const { shippingInfo, items, total, metodo_entrega, metodo_contacto, whatsapp_contacto } = req.body;
+  const { shippingInfo, items, total, metodo_entrega, metodo_contacto, whatsapp_contacto, direct_payment } = req.body;
   const userId = req.userId;
 
   if (!items || items.length === 0) {
@@ -14,10 +15,21 @@ exports.createOrder = async (req, res) => {
   try {
     await connection.beginTransaction();
     
-    // Insert order (estado_id = 1 is Pendiente de Aprobación)
+    // Validar stock si es direct_payment
+    if (direct_payment) {
+      for (const item of items) {
+        const [variant] = await connection.query('SELECT stock FROM variantes_producto WHERE id = ? FOR UPDATE', [item.variantId]);
+        if (!variant || variant.length === 0 || variant[0].stock < item.quantity) {
+          throw new Error(`Stock insuficiente para el producto ${item.name}`);
+        }
+      }
+    }
+
+    // Insert order (estado_id = 6 if direct_payment, else 1)
+    const initialState = direct_payment ? 6 : 1;
     const [orderResult] = await connection.query(
-      'INSERT INTO pedidos (usuario_id, estado_id, direccion_envio, total, metodo_entrega, metodo_contacto, whatsapp_contacto) VALUES (?, 1, ?, ?, ?, ?, ?)',
-      [userId, direccion_envio, total, metodo_entrega || 'retiro_fisico', metodo_contacto || 'chat_nativo', whatsapp_contacto || null]
+      'INSERT INTO pedidos (usuario_id, estado_id, direccion_envio, total, metodo_entrega, metodo_contacto, whatsapp_contacto) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [userId, initialState, direccion_envio, total, metodo_entrega || 'retiro_fisico', metodo_contacto || 'chat_nativo', whatsapp_contacto || null]
     );
     const orderId = orderResult.insertId;
     
@@ -43,11 +55,52 @@ exports.createOrder = async (req, res) => {
       }
     }
     
+    // Si es direct_payment, crear preferencia de MercadoPago
+    if (direct_payment) {
+      const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+      const preference = new Preference(client);
+
+      const frontendUrl = process.env.FRONTEND_URL || "https://royalhomes.cl";
+      const backendUrl = process.env.PUBLIC_BACKEND_URL || "https://api.royalhomes.cl";
+
+      const preferenceItems = items.map(item => ({
+        id: item.variantId.toString(),
+        title: item.name,
+        description: item.variant,
+        quantity: parseInt(item.quantity),
+        unit_price: parseFloat(item.price),
+        currency_id: 'CLP'
+      }));
+
+      const body = {
+        items: preferenceItems,
+        back_urls: {
+            success: `${frontendUrl}/profile?tab=compras`,
+            failure: `${frontendUrl}/profile?tab=compras`,
+            pending: `${frontendUrl}/profile?tab=compras`
+        },
+        auto_return: 'approved',
+        notification_url: `${backendUrl}/api/orders/webhook/mercadopago`,
+        external_reference: `ORDER_${orderId}`
+      };
+
+      const prefResult = await preference.create({ body });
+      
+      await connection.query('UPDATE pedidos SET mercadopago_preference_id = ? WHERE id = ?', [prefResult.id, orderId]);
+      await connection.commit();
+      
+      return res.status(201).json({ message: 'Redirecting to payment', orderId, init_point: prefResult.init_point });
+    }
+
+    await connection.commit();
     res.status(201).json({ message: 'Order created as request', orderId });
   } catch (error) {
     await connection.rollback();
     console.error(error);
-    res.status(500).json({ message: 'Error creating order' });
+    if (error.message.includes('Stock insuficiente')) {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Error creating order' });
   } finally {
     connection.release();
   }
@@ -103,5 +156,76 @@ exports.getOrderChat = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching chat' });
+  }
+};
+
+exports.receiveWebhook = async (req, res) => {
+  // Siempre retornar 200 inmediatamente a MercadoPago
+  res.sendStatus(200);
+
+  const paymentId = req.query.id || req.body?.data?.id;
+  const topic = req.query.topic || req.body?.type;
+
+  if (topic === 'payment' && paymentId) {
+    try {
+      const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+      const payment = new Payment(client);
+      const paymentData = await payment.get({ id: paymentId });
+
+      if (paymentData.status === 'approved' && paymentData.external_reference && paymentData.external_reference.startsWith('ORDER_')) {
+        const orderId = parseInt(paymentData.external_reference.replace('ORDER_', ''));
+        
+        // Evitar procesar el mismo pago 2 veces si llega duplicado
+        const [existingOrders] = await db.query('SELECT id, estado_id FROM pedidos WHERE id = ?', [orderId]);
+        if (existingOrders.length === 0) return;
+        const order = existingOrders[0];
+        
+        if (order.estado_id === 2) {
+          // Ya estaba pagado
+          return;
+        }
+
+        const connection = await db.getConnection();
+        try {
+          await connection.beginTransaction();
+
+          // Marcar como pagado (estado_id = 2) y guardar info de pago
+          await connection.query(
+            'UPDATE pedidos SET estado_id = 2, payment_id = ?, payment_status = ? WHERE id = ?',
+            [paymentId.toString(), 'approved', orderId]
+          );
+
+          // Descontar stock
+          const [detalles] = await connection.query('SELECT variante_id, cantidad FROM detalles_pedido WHERE pedido_id = ?', [orderId]);
+          for (const detalle of detalles) {
+            await connection.query(
+              'UPDATE variantes_producto SET stock = GREATEST(0, stock - ?) WHERE id = ?',
+              [detalle.cantidad, detalle.variante_id]
+            );
+          }
+
+          // Notificar a admins
+          const [admins] = await connection.query('SELECT id FROM usuarios WHERE rol_id = 1');
+          for (const admin of admins) {
+            await connection.query(
+              'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
+              [admin.id, 'mensaje', `El pedido #${orderId} ha sido pagado directo.`, orderId]
+            );
+            if (req.io) {
+              req.io.emit(`nueva_notificacion_${admin.id}`);
+            }
+          }
+
+          await connection.commit();
+        } catch (txnErr) {
+          await connection.rollback();
+          console.error('Error in webhook transaction:', txnErr);
+        } finally {
+          connection.release();
+        }
+      }
+    } catch (err) {
+      console.error('Error procesando webhook MP de orders:', err);
+    }
   }
 };
