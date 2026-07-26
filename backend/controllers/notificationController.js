@@ -1,11 +1,11 @@
-const db = require('../db');
+const db = require('../config/db');
 
 // Obtener notificaciones del usuario
 const getNotifications = async (req, res) => {
   try {
     const [notificaciones] = await db.query(
       'SELECT * FROM notificaciones WHERE usuario_id = ? ORDER BY creado_en DESC LIMIT 50',
-      [req.user.id]
+      [req.userId]
     );
     res.json(notificaciones);
   } catch (error) {
@@ -20,7 +20,7 @@ const markAsRead = async (req, res) => {
     const { id } = req.params;
     await db.query(
       'UPDATE notificaciones SET leida = TRUE WHERE id = ? AND usuario_id = ?',
-      [id, req.user.id]
+      [id, req.userId]
     );
     res.json({ message: 'Notificación marcada como leída' });
   } catch (error) {
@@ -34,7 +34,7 @@ const markAllAsRead = async (req, res) => {
   try {
     await db.query(
       'UPDATE notificaciones SET leida = TRUE WHERE usuario_id = ? AND leida = FALSE',
-      [req.user.id]
+      [req.userId]
     );
     res.json({ message: 'Todas las notificaciones marcadas como leídas' });
   } catch (error) {
