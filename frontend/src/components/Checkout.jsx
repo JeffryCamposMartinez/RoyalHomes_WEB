@@ -150,13 +150,13 @@ function Checkout({ cart, clearCart }) {
   }
 
   return (
-    <div className="pt-24 pb-16 px-container-margin-mobile md:px-container-margin-desktop max-w-[1440px] mx-auto min-h-screen">
-      <h1 className="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary mb-12">Finalizar Compra</h1>
+    <div className="pt-16 md:pt-24 pb-8 md:pb-16 px-container-margin-mobile md:px-container-margin-desktop max-w-[1440px] mx-auto min-h-screen">
+      <h1 className="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary mb-6 md:mb-12">Finalizar Compra</h1>
       
-      <div className="flex flex-col lg:flex-row gap-12">
+      <div className="flex flex-col lg:flex-row gap-6 md:gap-12">
         {/* Selector de Envío */}
-        <div className="flex-[2] bg-surface-container-low p-8 rounded-2xl">
-          <div className="flex justify-between items-center mb-8 border-b border-outline-variant/30 pb-4">
+        <div className="flex-[2] bg-surface-container-low p-5 md:p-8 rounded-2xl">
+          <div className="flex justify-between items-center mb-4 md:mb-8 border-b border-outline-variant/30 pb-3 md:pb-4">
             <h2 className="font-headline-md text-headline-md text-primary">Dirección de Envío</h2>
             {metodoEntrega !== 'retiro_fisico' && (
               <button type="button" onClick={() => setShowAddressModal(true)} className="bg-primary text-on-primary px-4 py-2 font-label-md uppercase tracking-widest text-xs rounded hover:opacity-90 transition-opacity">
@@ -166,10 +166,10 @@ function Checkout({ cart, clearCart }) {
           </div>
           
           {metodoEntrega === 'retiro_fisico' ? (
-            <div className="text-center py-12 bg-surface rounded-xl border border-outline-variant/30">
-              <span className="material-symbols-outlined text-4xl text-primary mb-3">storefront</span>
-              <p className="text-on-surface-variant font-medium">Retiro en nuestra tienda física.</p>
-              <p className="text-sm text-on-surface-variant mt-2">Av. Vitacura 2345, Santiago. Coordinaremos el horario de retiro luego de confirmar tu solicitud.</p>
+            <div className="text-center py-6 md:py-12 bg-surface rounded-xl border border-outline-variant/30">
+              <span className="material-symbols-outlined text-4xl text-primary mb-2 md:mb-3">storefront</span>
+              <p className="text-on-surface-variant font-medium text-sm md:text-base">Retiro en nuestra tienda física.</p>
+              <p className="text-xs md:text-sm text-on-surface-variant mt-2">Av. Vitacura 2345, Santiago. Coordinaremos el horario de retiro luego de confirmar tu solicitud.</p>
             </div>
           ) : loadingProfile ? (
             <div className="text-center py-8 text-on-surface-variant">Cargando direcciones...</div>
@@ -226,23 +226,23 @@ function Checkout({ cart, clearCart }) {
 
         {/* Resumen de la Orden y Opciones */}
         <div className="flex-1">
-          <div className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 shadow-[0_10px_20px_rgba(0,0,0,0.02)]">
-            <h2 className="font-headline-sm text-headline-sm text-primary mb-6">Opciones de Entrega</h2>
+          <div className="bg-surface-container-lowest p-5 md:p-8 rounded-2xl border border-outline-variant/30 shadow-[0_10px_20px_rgba(0,0,0,0.02)]">
+            <h2 className="font-headline-sm text-headline-sm text-primary mb-4 md:mb-6">Opciones de Entrega</h2>
             
-            <div className="flex flex-col gap-3 mb-6">
-              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'retiro_fisico' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
+            <div className="flex flex-col gap-3 mb-4 md:mb-6">
+              <label className={`flex items-center gap-3 p-3 md:p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'retiro_fisico' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
                 <input type="radio" name="entrega" value="retiro_fisico" checked={metodoEntrega === 'retiro_fisico'} onChange={(e) => setMetodoEntrega(e.target.value)} className="w-4 h-4 text-primary" />
                 <div>
-                  <span className="font-bold text-primary text-sm uppercase tracking-widest block">Retiro en Tienda Física</span>
-                  <span className="text-sm text-on-surface-variant block mt-1">Av. Vitacura 2345, Santiago</span>
+                  <span className="font-bold text-primary text-xs md:text-sm uppercase tracking-widest block">Retiro en Tienda Física</span>
+                  <span className="text-xs md:text-sm text-on-surface-variant block mt-1">Av. Vitacura 2345, Santiago</span>
                 </div>
               </label>
               
-              <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'acordar_vendedor' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
+              <label className={`flex items-center gap-3 p-3 md:p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'acordar_vendedor' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
                 <input type="radio" name="entrega" value="acordar_vendedor" checked={metodoEntrega === 'acordar_vendedor'} onChange={(e) => setMetodoEntrega(e.target.value)} className="w-4 h-4 text-primary" />
                 <div>
-                  <span className="font-bold text-primary text-sm uppercase tracking-widest block">Acordar Envío con Vendedor</span>
-                  <span className="text-sm text-on-surface-variant block mt-1">Coordinaremos la entrega y el costo de envío.</span>
+                  <span className="font-bold text-primary text-xs md:text-sm uppercase tracking-widest block">Acordar Envío con Vendedor</span>
+                  <span className="text-xs md:text-sm text-on-surface-variant block mt-1">Coordinaremos la entrega y el costo de envío.</span>
                 </div>
               </label>
             </div>
@@ -279,21 +279,21 @@ function Checkout({ cart, clearCart }) {
               </>
             )}
 
-            <div className="h-px bg-outline-variant/30 my-8"></div>
+            <div className="h-px bg-outline-variant/30 my-4 md:my-8"></div>
 
-            <h2 className="font-headline-sm text-headline-sm text-primary mb-6">Resumen</h2>
-            <div className="flex flex-col gap-4 mb-8">
+            <h2 className="font-headline-sm text-headline-sm text-primary mb-4 md:mb-6">Resumen</h2>
+            <div className="flex flex-col gap-4 mb-4 md:mb-8">
               {cart.map((item, idx) => (
                 <div key={idx} className="flex justify-between items-start border-b border-outline-variant/20 pb-4">
                   <div className="pr-4">
-                    <p className="font-body-md text-primary font-medium">{item.name} <span className="text-on-surface-variant text-sm ml-1">x{item.quantity}</span></p>
+                    <p className="font-body-md text-primary font-medium text-sm md:text-base">{item.name} <span className="text-on-surface-variant text-xs md:text-sm ml-1">x{item.quantity}</span></p>
                     <p className="font-caption text-caption text-on-surface-variant mt-1">{item.variant}</p>
                   </div>
-                  <p className="font-body-md text-primary whitespace-nowrap">${Number(item.price * item.quantity).toLocaleString('es-CL')}</p>
+                  <p className="font-body-md text-primary whitespace-nowrap text-sm md:text-base">${Number(item.price * item.quantity).toLocaleString('es-CL')}</p>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center mb-4 md:mb-8">
               <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total a Pagar</p>
               <p className="font-display-lg-mobile text-primary">${Math.round(total).toLocaleString('es-CL')}</p>
             </div>
