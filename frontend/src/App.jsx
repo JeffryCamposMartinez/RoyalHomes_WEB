@@ -113,6 +113,17 @@ function App() {
       });
   }, [selectedCategory, location.pathname]);
 
+  // Si volvemos de Mercado Pago con pago exitoso, limpiar el carrito
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('status') === 'approved' || params.get('collection_status') === 'approved') {
+      // Usar setTimeout para asegurarse que clearCart esté definido y el re-render sea limpio
+      setTimeout(() => {
+        clearCart();
+      }, 100);
+    }
+  }, [location.search]);
+
   const addToCart = (product, variant) => {
     setCart(prev => {
       // Check if product with same variant is already in cart

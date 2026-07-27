@@ -120,7 +120,6 @@ function Checkout({ cart, clearCart }) {
       if (res.ok) {
         const data = await res.json();
         if (data.init_point) {
-          clearCart(); // Clear cart before redirecting
           window.location.href = data.init_point;
           return;
         }
