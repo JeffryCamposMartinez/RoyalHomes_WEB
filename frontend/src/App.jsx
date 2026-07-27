@@ -156,7 +156,24 @@ function App() {
     setCart(prev => prev.filter((_, i) => i !== index));
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    
+    // Sincronizar inmediatamente con localStorage para evitar que la redirección lo deje obsoleto
+    const storedUserStr = localStorage.getItem('user');
+    if (storedUserStr) {
+       const storedUser = JSON.parse(storedUserStr);
+       storedUser.cart = [];
+       localStorage.setItem('user', JSON.stringify(storedUser));
+    } else {
+       const sessionUserStr = sessionStorage.getItem('user');
+       if (sessionUserStr) {
+          const sessionUser = JSON.parse(sessionUserStr);
+          sessionUser.cart = [];
+          sessionStorage.setItem('user', JSON.stringify(sessionUser));
+       }
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
