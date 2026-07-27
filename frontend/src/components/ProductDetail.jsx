@@ -3,7 +3,6 @@ import AdSenseBlock from './AdSenseBlock';
 
 function ProductDetail({ product, onBack, onAddToCart }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variantes?.[0] || null);
-  const [showSpecs, setShowSpecs] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
@@ -110,11 +109,6 @@ function ProductDetail({ product, onBack, onAddToCart }) {
           >
             {isDescriptionExpanded ? 'Mostrar menos' : '+ Mostrar más'}
           </button>
-          {(selectedVariant?.especificaciones || product.specifications) && (
-            <button onClick={() => setShowSpecs(true)} className="flex items-center gap-1 text-primary text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-8 hover:opacity-80 transition-opacity">
-              <span className="material-symbols-outlined text-[16px]">info</span> Ver Especificaciones
-            </button>
-          )}
           
           <div className="mb-3 md:mb-10">
             <div className="flex justify-between items-center mb-2 md:mb-4">
@@ -144,6 +138,17 @@ function ProductDetail({ product, onBack, onAddToCart }) {
               ))}
             </div>
           </div>
+
+          {(selectedVariant?.especificaciones || product.specifications) && (
+            <div className="mb-4 md:mb-8 bg-surface-container-lowest p-4 md:p-6 rounded-xl border border-outline-variant/30">
+              <h4 className="font-label-md text-xs md:text-sm text-primary uppercase tracking-widest font-bold mb-2 md:mb-3 flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[18px]">article</span> Especificaciones
+              </h4>
+              <div className="whitespace-pre-wrap font-body-sm md:font-body-md text-on-surface-variant leading-relaxed text-xs md:text-sm">
+                {selectedVariant?.especificaciones || product.specifications}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center md:items-end justify-between border-t border-outline-variant/30 pt-3 md:pt-8 mt-auto md:mt-0 mb-2 md:mb-8">
             <div>
@@ -185,22 +190,6 @@ function ProductDetail({ product, onBack, onAddToCart }) {
         </div>
       </div>
 
-      {/* Specifications Modal */}
-      {showSpecs && (
-        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowSpecs(false)}>
-          <div className="bg-surface rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
-            <div className="p-4 border-b border-outline-variant/30 flex justify-between items-center">
-              <h3 className="font-headline-sm text-headline-sm text-primary">Especificaciones</h3>
-              <button onClick={() => setShowSpecs(false)} className="text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto whitespace-pre-wrap font-body-md text-on-surface-variant leading-relaxed">
-              {selectedVariant?.especificaciones || product.specifications}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
