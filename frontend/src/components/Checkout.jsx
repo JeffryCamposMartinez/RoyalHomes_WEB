@@ -238,13 +238,15 @@ function Checkout({ cart, clearCart }) {
                 </div>
               </label>
               
-              <label className={`flex items-center gap-3 p-3 md:p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'acordar_vendedor' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
-                <input type="radio" name="entrega" value="acordar_vendedor" checked={metodoEntrega === 'acordar_vendedor'} onChange={(e) => setMetodoEntrega(e.target.value)} className="w-4 h-4 text-primary" />
-                <div>
-                  <span className="font-bold text-primary text-xs md:text-sm uppercase tracking-widest block">Acordar Envío con Vendedor</span>
-                  <span className="text-xs md:text-sm text-on-surface-variant block mt-1">Coordinaremos la entrega y el costo de envío.</span>
-                </div>
-              </label>
+              {profile?.rol_id === 1 && (
+                <label className={`flex items-center gap-3 p-3 md:p-4 border rounded-xl cursor-pointer transition-all ${metodoEntrega === 'acordar_vendedor' ? 'border-primary bg-primary/5' : 'border-outline-variant/50'}`}>
+                  <input type="radio" name="entrega" value="acordar_vendedor" checked={metodoEntrega === 'acordar_vendedor'} onChange={(e) => setMetodoEntrega(e.target.value)} className="w-4 h-4 text-primary" />
+                  <div>
+                    <span className="font-bold text-primary text-xs md:text-sm uppercase tracking-widest block">Acordar Envío con Vendedor</span>
+                    <span className="text-xs md:text-sm text-on-surface-variant block mt-1">Coordinaremos la entrega y el costo de envío.</span>
+                  </div>
+                </label>
+              )}
             </div>
 
             {metodoEntrega !== 'retiro_fisico' && (
