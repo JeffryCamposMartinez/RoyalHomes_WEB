@@ -247,6 +247,27 @@ function Checkout({ cart, clearCart }) {
                   </div>
                 </label>
               )}
+
+              {metodoEntrega === 'retiro_fisico' && (
+                <div className="mt-2 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                  <div className="flex gap-3">
+                    <span className="material-symbols-outlined text-primary text-[20px] mt-0.5">info</span>
+                    <div>
+                      <h4 className="font-bold text-primary text-sm uppercase tracking-widest mb-1">Coordinación de Tapiz y Tono</h4>
+                      <p className="text-sm text-on-surface-variant mb-4">Recuerda que, luego de finalizar tu compra, deberás contactar al vendedor para acordar el color del tapiz o el tono de tu mueble.</p>
+                      
+                      <div className="flex flex-col gap-3">
+                        <a href="https://wa.me/56912345678" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#25D366] font-bold hover:opacity-80 transition-opacity w-fit">
+                          <span className="material-symbols-outlined text-[18px]">forum</span> WhatsApp: +56 9 1234 5678
+                        </a>
+                        <button onClick={(e) => { e.preventDefault(); navigate('/profile?tab=mensajes'); }} className="flex items-center gap-2 text-sm text-primary font-bold hover:opacity-80 transition-opacity w-fit">
+                          <span className="material-symbols-outlined text-[18px]">chat</span> Enviar mensaje por la página
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {metodoEntrega !== 'retiro_fisico' && (
