@@ -254,7 +254,7 @@ function Checkout({ cart, clearCart }) {
                     <span className="material-symbols-outlined text-primary text-[20px] mt-0.5">info</span>
                     <div>
                       <h4 className="font-bold text-primary text-sm uppercase tracking-widest mb-1">Coordinación de Tapiz y Tono</h4>
-                      <p className="text-sm text-on-surface-variant mb-4">Recuerda que, luego de finalizar tu compra, deberás contactar al vendedor para acordar el color del tapiz o el tono de tu mueble.</p>
+                      <p className="text-sm text-on-surface-variant mb-4">Recuerda que, antes de finalizar tu compra, deberás contactar al vendedor para acordar el color del tapiz o el tono de tu mueble.</p>
                       
                       <div className="flex flex-col gap-3">
                         <a href="https://wa.me/56912345678" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#25D366] font-bold hover:opacity-80 transition-opacity w-fit">
