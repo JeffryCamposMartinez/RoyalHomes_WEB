@@ -17,7 +17,9 @@ function ProductDetail({ product, onBack, onAddToCart }) {
 
   const allImages = [];
   
-  if (selectedVariant && (selectedVariant.imagen_variante || (selectedVariant.galeria && selectedVariant.galeria.length > 0) || (typeof selectedVariant.galeria === 'string' && selectedVariant.galeria.length > 2))) {
+  const isFirstVariant = selectedVariant && product?.variantes?.[0]?.id === selectedVariant.id;
+
+  if (selectedVariant && !isFirstVariant && (selectedVariant.imagen_variante || (selectedVariant.galeria && selectedVariant.galeria.length > 0) || (typeof selectedVariant.galeria === 'string' && selectedVariant.galeria.length > 2))) {
     if (selectedVariant.imagen_variante) allImages.push(selectedVariant.imagen_variante);
     let galExtra = [];
     try {
