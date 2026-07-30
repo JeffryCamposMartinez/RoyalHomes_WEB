@@ -39,6 +39,31 @@ function ProductDetail({ product, onBack, onAddToCart }) {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Swipe handling
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      setCurrentImageIndex(prev => prev === allImages.length - 1 ? 0 : prev + 1);
+    }
+    if (isRightSwipe) {
+      setCurrentImageIndex(prev => prev === 0 ? allImages.length - 1 : prev - 1);
+    }
+  };
+
   if (!product) return null;
 
   const discount = product.discount_percentage || 0;
@@ -61,7 +86,12 @@ function ProductDetail({ product, onBack, onAddToCart }) {
 
       <div className="flex flex-col lg:flex-row gap-3 md:gap-12 lg:gap-24 flex-1 lg:items-start">
         {/* Imagen del producto */}
-        <div className="flex-1 w-full bg-surface-container-low rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.03)] relative group shrink-0 aspect-square md:aspect-auto">
+        <div 
+          className="flex-1 w-full bg-surface-container-low rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.03)] relative group shrink-0 aspect-square md:aspect-auto"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <img src={getImageUrl(allImages[currentImageIndex])} alt={product.nombre} className="w-full h-full md:aspect-square lg:h-[600px] lg:aspect-auto object-cover transition-all duration-300" />
           
           {selectedVariant && (

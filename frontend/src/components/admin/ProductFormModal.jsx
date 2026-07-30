@@ -321,7 +321,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         // Link Variant 1 Price to Base Price
         if (variants.length > 0 && variants[0].id === variantId && String(precioBase) !== String(updatedData.precio_especifico)) {
            setPrecioBase(Math.round(Number(updatedData.precio_especifico)));
-           const productPayload = { nombre, descripcion, especificaciones, precio_base: updatedData.precio_especifico, imagen_base: product?.imagen_base, galeria: product?.galeria, categoria_id: categoriaId };
+           const productPayload = { nombre, descripcion, especificaciones, precio_base: updatedData.precio_especifico, imagen_base: product?.image, galeria: parsedGallery, categoria_id: categoriaId };
            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/products/${productId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
