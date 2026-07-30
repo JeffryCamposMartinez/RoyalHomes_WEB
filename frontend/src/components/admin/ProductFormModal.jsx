@@ -20,6 +20,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
   const { showAlert, showConfirm } = useAlert();
   const [activeTab, setActiveTab] = useState('base'); // 'base' | 'variants'
   const isEdit = !!product;
+  const [isSaving, setIsSaving] = useState(false);
 
   // Product State
   const [nombre, setNombre] = useState(product?.name || '');
@@ -69,6 +70,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
       return showAlert('Debes subir al menos una imagen para el producto (portada).', 'error');
     }
     
+    setIsSaving(true);
     const finalUrls = [];
     
     // Subir imágenes nuevas
@@ -130,12 +132,16 @@ export default function ProductFormModal({ product, categories, user, onClose, o
         } else {
           showAlert('Producto Base Actualizado', 'success');
         }
+        window.dispatchEvent(new Event('productsUpdated'));
         onRefresh();
       } else {
         showAlert(data.message || 'Error guardando producto', 'error');
       }
     } catch (err) {
       console.error(err);
+      showAlert('Error guardando producto', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -280,10 +286,13 @@ export default function ProductFormModal({ product, categories, user, onClose, o
     } catch (err) {
       console.error(err);
       showAlert('Error de red al actualizar stock', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleUpdateVariant = async (variantId, updatedData, editGallery) => {
+    setIsSaving(true);
     try {
       const finalUrls = [];
       
@@ -329,6 +338,7 @@ export default function ProductFormModal({ product, categories, user, onClose, o
            });
         }
 
+        window.dispatchEvent(new Event('productsUpdated'));
         onRefresh();
         showAlert('Variante actualizada exitosamente', 'success');
       } else {
@@ -338,12 +348,22 @@ export default function ProductFormModal({ product, categories, user, onClose, o
     } catch (err) {
       console.error(err);
       showAlert('Error de red al actualizar variante', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-      <div className="bg-surface rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-surface rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh] relative">
+        {isSaving && (
+          <div className="absolute inset-0 bg-surface/70 backdrop-blur-sm z-[110] flex items-center justify-center rounded-2xl">
+            <div className="flex flex-col items-center gap-4 bg-surface p-6 rounded-2xl shadow-xl border border-outline-variant/30">
+              <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <p className="font-label-md text-primary tracking-widest uppercase">Guardando cambios...</p>
+            </div>
+          </div>
+        )}
         <div className="p-4 md:p-6 border-b border-outline-variant/30 flex justify-between items-center">
           <h2 className="font-headline-md text-headline-md text-primary">{isEdit ? 'Editar Producto' : 'Nuevo Producto'}</h2>
           <button onClick={onClose} className="text-on-surface-variant hover:text-primary transition-colors">

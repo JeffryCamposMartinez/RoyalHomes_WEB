@@ -96,21 +96,28 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    let url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products`;
-    if (selectedCategory) {
-      url += `?category=${selectedCategory}`;
-    }
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching products:', err);
-        setLoading(false);
-      });
+    const fetchProducts = () => {
+      setLoading(true);
+      let url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products`;
+      if (selectedCategory) {
+        url += `?category=${selectedCategory}`;
+      }
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          setProducts(data);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error('Error fetching products:', err);
+          setLoading(false);
+        });
+    };
+
+    fetchProducts();
+
+    window.addEventListener('productsUpdated', fetchProducts);
+    return () => window.removeEventListener('productsUpdated', fetchProducts);
   }, [selectedCategory, location.pathname]);
 
   // Si volvemos de Mercado Pago con pago exitoso, limpiar el carrito
