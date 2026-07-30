@@ -111,6 +111,18 @@ export default function ProductFormModal({ product, categories, user, onClose, o
       });
       const data = await res.json();
       if (res.ok) {
+        // Link Base Price to Variant 1 Price
+        if (isEdit && variants.length > 0 && String(variants[0].precio_especifico) !== String(precioBase)) {
+           const firstVariant = variants[0];
+           const varPayload = { ...firstVariant, precio_especifico: precioBase };
+           await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/variants/${firstVariant.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
+              body: JSON.stringify(varPayload)
+           });
+           setVariants(variants.map((v, i) => i === 0 ? varPayload : v));
+        }
+
         if (!isEdit) {
           setProductId(data.id);
           showAlert('Producto Base Creado. Ahora puedes añadir variantes.', 'success');
@@ -305,6 +317,18 @@ export default function ProductFormModal({ product, categories, user, onClose, o
       });
       if (res.ok) {
         setVariants(variants.map(v => v.id === variantId ? { ...v, ...payload } : v));
+        
+        // Link Variant 1 Price to Base Price
+        if (variants.length > 0 && variants[0].id === variantId && String(precioBase) !== String(updatedData.precio_especifico)) {
+           setPrecioBase(Math.round(Number(updatedData.precio_especifico)));
+           const productPayload = { nombre, descripcion, especificaciones, precio_base: updatedData.precio_especifico, imagen_base: product?.imagen_base, galeria: product?.galeria, categoria_id: categoriaId };
+           await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/products/${productId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.accessToken}` },
+              body: JSON.stringify(productPayload)
+           });
+        }
+
         onRefresh();
         showAlert('Variante actualizada exitosamente', 'success');
       } else {
@@ -357,7 +381,14 @@ export default function ProductFormModal({ product, categories, user, onClose, o
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="flex-1 flex flex-col gap-2">
                   <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Precio Base ($)</label>
-                  <input required type="number" step="1" value={precioBase} onChange={e => setPrecioBase(e.target.value)} className="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-0 outline-none" />
+                  <input required type="number" step="1" value={precioBase} onChange={e => {
+                    setPrecioBase(e.target.value);
+                    if (variants.length > 0) {
+                      const newVariants = [...variants];
+                      newVariants[0].precio_especifico = e.target.value;
+                      setVariants(newVariants);
+                    }
+                  }} className="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-0 outline-none" />
                 </div>
               </div>
 
@@ -439,8 +470,8 @@ export default function ProductFormModal({ product, categories, user, onClose, o
                   <input placeholder="Material (Ej. Roble)" value={newVariant.material} onChange={e => setNewVariant({...newVariant, material: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
                   <input placeholder="Color (Ej. Natural)" value={newVariant.acabado_color} onChange={e => setNewVariant({...newVariant, acabado_color: e.target.value})} className="w-full bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
                   <div className="flex gap-2 w-full">
-                    <input placeholder="SKU Único" value={newVariant.sku} onChange={e => setNewVariant({...newVariant, sku: e.target.value})} className="flex-1 bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
-                    <button type="button" onClick={() => setNewVariant({...newVariant, sku: generateRandomSku()})} className="bg-surface-variant p-3 rounded-lg text-on-surface-variant hover:bg-primary/20 transition-colors" title="Generar SKU Automático">
+                    <input placeholder="SKU Único" value={newVariant.sku} onChange={e => setNewVariant({...newVariant, sku: e.target.value})} className="flex-1 min-w-0 bg-surface p-3 rounded-lg border border-outline-variant outline-none focus:border-primary" />
+                    <button type="button" onClick={() => setNewVariant({...newVariant, sku: generateRandomSku()})} className="bg-surface-variant p-3 shrink-0 rounded-lg text-on-surface-variant hover:bg-primary/20 transition-colors" title="Generar SKU Automático">
                       <span className="material-symbols-outlined text-[20px]">autorenew</span>
                     </button>
                   </div>
