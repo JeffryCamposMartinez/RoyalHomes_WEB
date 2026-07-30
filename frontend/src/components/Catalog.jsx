@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import AdSenseBlock from './AdSenseBlock';
+
 
 import InfiniteCategoryCarousel from './InfiniteCategoryCarousel';
 
@@ -183,12 +183,7 @@ function Catalog({ products, categories, selectedCategory, onSelectCategory, onP
           </section>
         )}
 
-        {/* Ad Placeholder (Top) */}
-        <div className="w-full flex justify-center my-8 md:my-12">
-          <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[120px] bg-surface rounded flex items-center justify-center overflow-hidden">
-            <AdSenseBlock slot="8250857236" />
-          </div>
-        </div>
+
 
         <InfiniteCategoryCarousel 
           categories={categories} 
@@ -306,12 +301,7 @@ function Catalog({ products, categories, selectedCategory, onSelectCategory, onP
           </div>
         )}
 
-          {/* Ad Placeholder (Middle) */}
-          <div className="flex w-full justify-center my-8 md:my-16">
-            <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[250px] bg-surface rounded flex items-center justify-center overflow-hidden">
-              <AdSenseBlock slot="8250857236" />
-            </div>
-          </div>
+
       </main>
 
     </>

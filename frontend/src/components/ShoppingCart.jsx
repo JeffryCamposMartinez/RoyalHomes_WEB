@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdSenseBlock from './AdSenseBlock';
+
 
 function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
   const navigate = useNavigate();
@@ -175,12 +175,6 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
         </div>
       )}
 
-      {/* Ad Placeholder (Bottom) */}
-      <div className="hidden md:flex w-full justify-center mt-12 mb-4">
-        <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[250px] bg-surface rounded flex items-center justify-center overflow-hidden">
-          <AdSenseBlock slot="8250857236" />
-        </div>
-      </div>
 
       {/* Delete Confirmation Modal */}
       {itemToDelete !== null && (

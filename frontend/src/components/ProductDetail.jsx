@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdSenseBlock from './AdSenseBlock';
+
 
 function ProductDetail({ product, onBack, onAddToCart }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variantes?.[0] || null);
@@ -183,12 +183,7 @@ function ProductDetail({ product, onBack, onAddToCart }) {
         </div>
       </div>
 
-      {/* Ad Placeholder (Bottom) */}
-      <div className="hidden md:flex w-full justify-center mt-16 mb-4">
-        <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[250px] bg-surface rounded flex items-center justify-center overflow-hidden">
-          <AdSenseBlock slot="8250857236" />
-        </div>
-      </div>
+
 
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAlert } from '../contexts/AlertContext';
-import AdSenseBlock from '../components/AdSenseBlock';
+
 import { io } from 'socket.io-client';
 
 function Profile({ user, onUpdateUser }) {
@@ -116,7 +116,7 @@ function Profile({ user, onUpdateUser }) {
         {/* Ad Placeholder */}
         <div className="hidden md:flex w-full justify-center mb-8">
           <div className="w-full max-w-[970px] min-h-[90px] md:min-h-[250px] bg-surface rounded flex items-center justify-center overflow-hidden">
-            <AdSenseBlock slot="8250857236" />
+
           </div>
         </div>
     </div>
