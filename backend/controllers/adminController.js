@@ -280,18 +280,19 @@ exports.getContactSettings = async (req, res) => {
 
 exports.updateContactSettings = async (req, res) => {
   try {
-    const { instagram_url, facebook_url, whatsapp, email_contacto, telefono, direccion_fisica } = req.body;
+    const { instagram_url, facebook_url, tiktok_url, whatsapp, email_contacto, telefono, direccion_fisica } = req.body;
     await db.query(
-      `INSERT INTO configuracion_contacto (id, instagram_url, facebook_url, whatsapp, email_contacto, telefono, direccion_fisica) 
-       VALUES (1, ?, ?, ?, ?, ?, ?) 
+      `INSERT INTO configuracion_contacto (id, instagram_url, facebook_url, tiktok_url, whatsapp, email_contacto, telefono, direccion_fisica) 
+       VALUES (1, ?, ?, ?, ?, ?, ?, ?) 
        ON DUPLICATE KEY UPDATE 
        instagram_url = VALUES(instagram_url),
        facebook_url = VALUES(facebook_url),
+       tiktok_url = VALUES(tiktok_url),
        whatsapp = VALUES(whatsapp),
        email_contacto = VALUES(email_contacto),
        telefono = VALUES(telefono),
        direccion_fisica = VALUES(direccion_fisica)`,
-      [instagram_url, facebook_url, whatsapp, email_contacto, telefono, direccion_fisica]
+      [instagram_url, facebook_url, tiktok_url, whatsapp, email_contacto, telefono, direccion_fisica]
     );
     res.json({ message: 'Configuracion de contacto actualizada' });
   } catch (error) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { WhatsAppIcon, InstagramIcon, FacebookIcon } from './Icons';
+import { WhatsAppIcon, InstagramIcon, FacebookIcon, TiktokIcon } from './Icons';
 
 function Footer() {
   const [contactInfo, setContactInfo] = useState(null);
@@ -90,7 +90,7 @@ function Footer() {
                 )}
               </div>
 
-              {(contactInfo.instagram_url || contactInfo.facebook_url) && (
+              {(contactInfo.instagram_url || contactInfo.facebook_url || contactInfo.tiktok_url) && (
                 <div className="flex gap-4">
                   {contactInfo.instagram_url && (
                     <a href={contactInfo.instagram_url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary hover:bg-surface transition-all hover:scale-105 hover:shadow-sm">
@@ -100,6 +100,11 @@ function Footer() {
                   {contactInfo.facebook_url && (
                     <a href={contactInfo.facebook_url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary hover:bg-surface transition-all hover:scale-105 hover:shadow-sm">
                       <FacebookIcon className="w-5 h-5" />
+                    </a>
+                  )}
+                  {contactInfo.tiktok_url && (
+                    <a href={contactInfo.tiktok_url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary hover:bg-surface transition-all hover:scale-105 hover:shadow-sm">
+                      <TiktokIcon className="w-5 h-5" />
                     </a>
                   )}
                 </div>

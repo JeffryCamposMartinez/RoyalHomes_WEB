@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAlert } from '../../contexts/AlertContext';
-import { WhatsAppIcon, InstagramIcon, FacebookIcon } from '../Icons';
+import { WhatsAppIcon, InstagramIcon, FacebookIcon, TiktokIcon } from '../Icons';
 
 function ContactSettingsManager({ token }) {
   const { showAlert } = useAlert();
   const [formData, setFormData] = useState({
     instagram_url: '',
     facebook_url: '',
+    tiktok_url: '',
     whatsapp: '',
     email_contacto: '',
     telefono: '',
@@ -30,6 +31,7 @@ function ContactSettingsManager({ token }) {
           setFormData({
             instagram_url: data.instagram_url ? data.instagram_url.replace('https://instagram.com/', '') : '',
             facebook_url: data.facebook_url ? data.facebook_url.replace('https://facebook.com/', '') : '',
+            tiktok_url: data.tiktok_url ? data.tiktok_url.replace('https://tiktok.com/@', '') : '',
             whatsapp: data.whatsapp || '',
             email_contacto: data.email_contacto || '',
             telefono: data.telefono || '',
@@ -64,6 +66,9 @@ function ContactSettingsManager({ token }) {
     }
     if (submitData.facebook_url && !submitData.facebook_url.startsWith('http')) {
       submitData.facebook_url = `https://facebook.com/${submitData.facebook_url}`;
+    }
+    if (submitData.tiktok_url && !submitData.tiktok_url.startsWith('http')) {
+      submitData.tiktok_url = `https://tiktok.com/@${submitData.tiktok_url.replace('@', '')}`;
     }
 
     try {
@@ -133,6 +138,22 @@ function ContactSettingsManager({ token }) {
               type="text" 
               name="facebook_url" 
               value={formData.facebook_url} 
+              onChange={handleChange} 
+              placeholder="tu_tienda"
+              className="w-full bg-transparent outline-none text-on-surface"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="font-label-md text-on-surface-variant uppercase tracking-widest">URL de TikTok</label>
+          <div className="flex items-center bg-surface-container-lowest rounded-lg border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-colors overflow-hidden pl-4 pr-3 py-3">
+            <TiktokIcon className="w-5 h-5 text-on-surface-variant mr-3" />
+            <span className="text-on-surface-variant whitespace-nowrap text-sm font-medium">https://tiktok.com/@</span>
+            <input 
+              type="text" 
+              name="tiktok_url" 
+              value={formData.tiktok_url} 
               onChange={handleChange} 
               placeholder="tu_tienda"
               className="w-full bg-transparent outline-none text-on-surface"
