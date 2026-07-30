@@ -59,7 +59,7 @@ function ProductDetail({ product, onBack, onAddToCart }) {
         Volver al Estudio
       </button>
 
-      <div className="flex flex-col lg:flex-row gap-3 md:gap-12 lg:gap-24 flex-1">
+      <div className="flex flex-col lg:flex-row gap-3 md:gap-12 lg:gap-24 flex-1 lg:items-start">
         {/* Imagen del producto */}
         <div className="flex-1 w-full bg-surface-container-low rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.03)] relative group shrink-0 aspect-square md:aspect-auto">
           <img src={getImageUrl(allImages[currentImageIndex])} alt={product.nombre} className="w-full h-full md:aspect-square lg:h-[600px] lg:aspect-auto object-cover transition-all duration-300" />
