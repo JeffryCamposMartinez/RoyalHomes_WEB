@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import AdminLayout from './layouts/AdminLayout';
 import Footer from './components/Footer';
+import Policies from './components/Policies';
 import ScrollToTop from './components/ScrollToTop';
 
 function App() {
@@ -275,6 +276,8 @@ function App() {
 
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/register" element={<Register />} />
+          
+          <Route path="/policies/:type" element={<Policies />} />
           
           {/* Admin Routes */}
           <Route path="/admin/*" element={

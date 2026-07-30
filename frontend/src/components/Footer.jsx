@@ -53,9 +53,9 @@ function Footer() {
             <h3 className="font-label-md text-primary uppercase tracking-widest mb-6 border-b border-outline-variant/30 pb-2 w-max">Enlaces Rápidos</h3>
             <nav className="flex flex-col gap-4">
               <Link to="/" className="font-body-sm text-on-surface-variant hover:text-primary transition-colors">Tienda</Link>
-              <a href="#" className="font-body-sm text-on-surface-variant hover:text-primary transition-colors">Guía de Cuidado</a>
-              <a href="#" className="font-body-sm text-on-surface-variant hover:text-primary transition-colors">Envíos y Devoluciones</a>
-              <a href="#" className="font-body-sm text-on-surface-variant hover:text-primary transition-colors">Política de Privacidad</a>
+              <Link to="/policies/care" className="font-body-sm text-on-surface-variant hover:text-primary transition-colors">Guía de Cuidado</Link>
+              <Link to="/policies/shipping" className="font-body-sm text-on-surface-variant hover:text-primary transition-colors">Envíos y Devoluciones</Link>
+              <Link to="/policies/privacy" className="font-body-sm text-on-surface-variant hover:text-primary transition-colors">Política de Privacidad</Link>
             </nav>
           </div>
 
