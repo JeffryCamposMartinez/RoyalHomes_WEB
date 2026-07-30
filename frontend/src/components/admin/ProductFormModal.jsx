@@ -351,16 +351,18 @@ export default function ProductFormModal({ product, categories, user, onClose, o
           </button>
         </div>
 
-        <div className="flex border-b border-outline-variant/30 px-2 md:px-6 overflow-x-auto no-scrollbar">
-          <button onClick={() => setActiveTab('base')} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${activeTab === 'base' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
-            Info Base
-          </button>
-          <button onClick={() => setActiveTab('variants')} disabled={!productId} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${!productId ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'variants' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
-            Variantes ({variants.length})
-          </button>
-          <button onClick={() => setActiveTab('stock')} disabled={!productId || variants.length === 0} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${(!productId || variants.length === 0) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'stock' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
-            Stock
-          </button>
+        <div className="border-b border-outline-variant/30">
+          <div className="flex px-2 md:px-6 overflow-x-auto no-scrollbar">
+            <button onClick={() => setActiveTab('base')} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 -mb-[1px] transition-colors whitespace-nowrap ${activeTab === 'base' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
+              Info Base
+            </button>
+            <button onClick={() => setActiveTab('variants')} disabled={!productId} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 -mb-[1px] transition-colors whitespace-nowrap ${!productId ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'variants' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
+              Variantes ({variants.length})
+            </button>
+            <button onClick={() => setActiveTab('stock')} disabled={!productId || variants.length === 0} className={`shrink-0 py-4 px-4 font-label-md uppercase tracking-widest border-b-2 -mb-[1px] transition-colors whitespace-nowrap ${(!productId || variants.length === 0) ? 'opacity-50 cursor-not-allowed' : ''} ${activeTab === 'stock' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant'}`}>
+              Stock
+            </button>
+          </div>
         </div>
 
         <div className="p-4 md:p-6 overflow-y-auto flex-1 font-body-md text-on-surface">
