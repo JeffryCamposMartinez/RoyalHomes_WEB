@@ -145,10 +145,9 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
         
         <div 
           onClick={() => onSelectCategory(null)}
-          className="relative flex-none w-[60px] h-[120px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group cursor-pointer mr-3 md:mr-4 shrink-0 flex items-center justify-center bg-white shadow-sm hover:shadow-md transition-shadow"
+          className={`relative flex-none w-[110px] h-[150px] md:w-[240px] md:h-[320px] rounded-2xl overflow-hidden group cursor-pointer mr-3 md:mr-5 shrink-0 flex items-center justify-center transition-all duration-300 ${!selectedCategory ? 'ring-2 ring-primary ring-offset-[3px] ring-offset-surface bg-primary text-on-primary shadow-md scale-100' : 'bg-surface-variant/30 text-primary opacity-80 hover:opacity-100 hover:scale-[1.02]'}`}
         >
-          <div className={`absolute inset-0 border-[3px] transition-colors pointer-events-none ${!selectedCategory ? 'border-primary' : 'border-transparent'}`}></div>
-          <h3 className="text-primary font-display-lg text-lg md:text-3xl font-light tracking-wide pointer-events-none transition-transform duration-700 group-hover:scale-110">
+          <h3 className="font-display-lg text-lg md:text-3xl font-light tracking-wide pointer-events-none transition-transform duration-700 group-hover:scale-110">
             Todos
           </h3>
         </div>
@@ -184,9 +183,9 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
                   setIsDragging(false);
                   isDraggingRef.current = false;
                 }}
-                className="relative flex-none shrink-0 min-w-[120px] w-[120px] h-[120px] md:min-w-[240px] md:w-[240px] md:h-[320px] rounded-sm overflow-hidden group pointer-events-auto"
+                className={`relative flex-none shrink-0 w-[110px] h-[150px] md:w-[240px] md:h-[320px] rounded-2xl overflow-hidden group pointer-events-auto cursor-pointer transition-all duration-300 ${selectedCategory === cat.id ? 'ring-2 ring-primary ring-offset-[3px] ring-offset-surface scale-100 shadow-md z-10' : 'opacity-85 hover:opacity-100 hover:scale-[1.02]'}`}
               >
-                <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105 pointer-events-none">
+                <div className="absolute inset-0 transition-transform duration-1000 group-hover:scale-110 pointer-events-none">
                   {cat.imagen_url || cat.image ? (
                     <img 
                       src={cat.imagen_url || cat.image}
@@ -199,9 +198,11 @@ export default function InfiniteCategoryCarousel({ categories, selectedCategory,
                     </div>
                   )}
                 </div>
-                <div className={`absolute inset-0 border-[3px] transition-colors pointer-events-none ${selectedCategory === cat.id ? 'border-primary' : 'border-transparent'}`}></div>
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
-                <h3 className="absolute bottom-2 left-2 md:bottom-4 md:left-4 text-white font-display-lg text-sm md:text-xl font-light tracking-wide pointer-events-none">
+                
+                {/* Smooth Elegant Gradient */}
+                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
+                
+                <h3 className="absolute bottom-3 md:bottom-5 left-0 right-0 px-2 text-center text-white font-display-lg text-[14px] md:text-2xl font-light tracking-wide pointer-events-none leading-tight drop-shadow-lg">
                   {cat.name}
                 </h3>
               </div>
