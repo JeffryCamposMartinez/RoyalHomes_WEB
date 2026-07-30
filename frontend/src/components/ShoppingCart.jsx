@@ -41,7 +41,7 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
 
     const discount = latestProduct?.discount_percentage || 0;
     // We try to use the current variant price, fallback to product price, fallback to old cart item price
-    const basePrice = latestVariant?.precio || latestProduct?.price || item.price;
+    const basePrice = latestVariant?.precio_especifico || latestProduct?.price || item.price;
     const calcPrice = getCalculatedPrice(parseFloat(basePrice), discount);
     
     return {
@@ -51,6 +51,7 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
       error,
       discount,
       calcPrice,
+      price: basePrice,
       imageUrl: latestVariant?.imagen_url || latestProduct?.image || item.image
     };
   });
