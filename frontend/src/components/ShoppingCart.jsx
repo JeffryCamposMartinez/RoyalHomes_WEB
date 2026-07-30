@@ -19,19 +19,38 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
 
   const cartItems = cart.map(item => {
     const latestProduct = products?.find(p => p.id === item.id);
+    const latestVariant = latestProduct?.variantes?.find(v => v.id === item.variantId);
+    
+    let error = null;
+    if (!latestProduct) {
+      error = 'Producto eliminado del catálogo';
+    } else if (!latestVariant) {
+      error = 'Opción seleccionada ya no disponible';
+    } else if (latestVariant.stock <= 0) {
+      error = 'Agotado';
+    } else if (latestVariant.stock < item.quantity) {
+      error = `Solo ${latestVariant.stock} disponible${latestVariant.stock === 1 ? '' : 's'}`;
+    }
+
     const discount = latestProduct?.discount_percentage || 0;
-    const calcPrice = getCalculatedPrice(parseFloat(item.price), discount);
+    // We try to use the current variant price, fallback to product price, fallback to old cart item price
+    const basePrice = latestVariant?.precio || latestProduct?.price || item.price;
+    const calcPrice = getCalculatedPrice(parseFloat(basePrice), discount);
+    
     return {
       ...item,
       latestProduct,
+      latestVariant,
+      error,
       discount,
       calcPrice,
-      imageUrl: latestProduct ? latestProduct.image : item.image
+      imageUrl: latestVariant?.imagen_url || latestProduct?.image || item.image
     };
   });
 
-  const totalOriginal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-  const total = cartItems.reduce((sum, item) => sum + (item.calcPrice * item.quantity), 0);
+  const hasErrors = cartItems.some(item => item.error !== null);
+  const totalOriginal = cartItems.filter(i => !i.error).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  const total = cartItems.filter(i => !i.error).reduce((sum, item) => sum + (item.calcPrice * item.quantity), 0);
   const totalAhorro = totalOriginal - total;
 
   return (
@@ -55,7 +74,12 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
           <div className="flex-1 flex flex-col gap-3 md:gap-4">
             {cartItems.map((item, idx) => {
               return (
-                <div key={idx} className="flex flex-row items-start md:items-center gap-4 p-3 md:p-6 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-[0_10px_20px_rgba(0,0,0,0.02)] relative">
+                <div key={idx} className={`flex flex-row items-start md:items-center gap-4 p-3 md:p-6 bg-surface-container-lowest border rounded-xl shadow-[0_10px_20px_rgba(0,0,0,0.02)] relative ${item.error ? 'border-error/50 bg-error/5 mt-4' : 'border-outline-variant/30'}`}>
+                  {item.error && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-error text-on-error px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-full whitespace-nowrap z-20 shadow-md">
+                      {item.error}
+                    </div>
+                  )}
                   <button 
                     onClick={() => setItemToDelete(idx)}
                     className="absolute top-2 right-2 md:static md:ml-auto text-error hover:opacity-70 p-1 md:p-2 rounded-full hover:bg-error-container transition-colors z-10"
@@ -129,9 +153,10 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
               </div>
               <button 
                 onClick={() => navigate('/checkout')}
-                className="px-6 py-3 bg-primary text-on-primary rounded-full font-label-md text-xs uppercase tracking-widest hover:bg-primary/90 shadow-md transition-all font-bold"
+                disabled={hasErrors}
+                className={`px-6 py-3 rounded-full font-label-md text-xs uppercase tracking-widest shadow-md transition-all font-bold ${hasErrors ? 'bg-surface-variant text-on-surface-variant opacity-50 cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90'}`}
               >
-                Continuar ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
+                Continuar ({cartItems.filter(i => !i.error).reduce((acc, item) => acc + item.quantity, 0)})
               </button>
             </div>
             
@@ -159,10 +184,14 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
               <div className="flex flex-col gap-4">
                 <button 
                   onClick={() => navigate('/checkout')}
-                  className="w-full px-8 py-4 bg-primary text-on-primary rounded-full font-label-md text-label-md uppercase tracking-widest hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-md text-center"
+                  disabled={hasErrors}
+                  className={`w-full py-4 rounded-full font-label-md uppercase tracking-widest shadow-md transition-all font-bold ${hasErrors ? 'bg-surface-variant text-on-surface-variant opacity-50 cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90 hover:scale-[1.02]'}`}
                 >
-                  Proceder al Pago
+                  Continuar con la compra
                 </button>
+                {hasErrors && (
+                  <p className="text-error text-xs text-center mt-2 font-bold">Elimina los productos sin stock para continuar</p>
+                )}
                 <button 
                   onClick={() => navigate('/')}
                   className="w-full px-8 py-4 border border-outline-variant text-primary rounded-full font-label-md text-label-md uppercase tracking-widest hover:bg-surface-container-low transition-colors text-center"
