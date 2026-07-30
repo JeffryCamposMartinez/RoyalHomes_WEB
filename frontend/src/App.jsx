@@ -186,6 +186,32 @@ function App() {
     }
   };
 
+  const removePurchasedItems = (indices) => {
+    if (!indices || indices.length === 0) {
+      clearCart();
+      return;
+    }
+    
+    setCart(prev => {
+      const newCart = prev.filter((_, i) => !indices.includes(i));
+      // Sincronizar inmediatamente con localStorage
+      const storedUserStr = localStorage.getItem('user');
+      if (storedUserStr) {
+         const storedUser = JSON.parse(storedUserStr);
+         storedUser.cart = newCart;
+         localStorage.setItem('user', JSON.stringify(storedUser));
+      } else {
+         const sessionUserStr = sessionStorage.getItem('user');
+         if (sessionUserStr) {
+            const sessionUser = JSON.parse(sessionUserStr);
+            sessionUser.cart = newCart;
+            sessionStorage.setItem('user', JSON.stringify(sessionUser));
+         }
+      }
+      return newCart;
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
@@ -232,7 +258,7 @@ function App() {
           } />
 
           <Route path="/checkout" element={
-            user ? <Checkout cart={cart} clearCart={clearCart} /> : <Navigate to="/login" />
+            user ? <Checkout cart={cart} clearCart={clearCart} removePurchasedItems={removePurchasedItems} /> : <Navigate to="/login" />
           } />
 
           {/* Protected Profile */}

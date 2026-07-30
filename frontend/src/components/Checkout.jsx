@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAlert } from '../contexts/AlertContext';
 import AddressForm from './AddressForm';
 
-function Checkout({ cart, clearCart }) {
+function Checkout({ cart, clearCart, removePurchasedItems }) {
   const { showAlert } = useAlert();
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedKeys = location.state?.selectedKeys || [];
+
+  // Filter cart to only include selected items. If no selection (e.g. direct navigation), we fallback to all valid items, or redirect back to cart.
+  const checkoutItems = selectedKeys.length > 0 
+    ? cart.filter(item => selectedKeys.includes(`${item.id}-${item.variantId}`))
+    : cart;
+
+  const checkoutIndices = selectedKeys.length > 0
+    ? cart.map((item, idx) => selectedKeys.includes(`${item.id}-${item.variantId}`) ? idx : -1).filter(idx => idx !== -1)
+    : cart.map((_, idx) => idx);
   
   const [profile, setProfile] = useState(null);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -20,7 +31,7 @@ function Checkout({ cart, clearCart }) {
   const [metodoContacto, setMetodoContacto] = useState('chat_nativo');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   
-  const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  const total = checkoutItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
   const getToken = () => {
     const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
@@ -107,7 +118,7 @@ function Checkout({ cart, clearCart }) {
           ...(token && { 'Authorization': `Bearer ${token}` })
         },
         body: JSON.stringify({
-          items: cart,
+          items: checkoutItems,
           shippingInfo: metodoEntrega === 'retiro_fisico' ? null : selectedAddress,
           total,
           metodo_entrega: metodoEntrega,
@@ -124,7 +135,11 @@ function Checkout({ cart, clearCart }) {
           return;
         }
         showAlert(`¡Solicitud enviada! Orden #${data.orderId}. El vendedor se pondrá en contacto pronto.`, 'success');
-        clearCart();
+        if (removePurchasedItems) {
+          removePurchasedItems(checkoutIndices);
+        } else {
+          clearCart();
+        }
         navigate('/profile'); // Redirect to profile to see the order
       } else {
         const errorData = await res.json().catch(() => null);
@@ -303,17 +318,17 @@ function Checkout({ cart, clearCart }) {
             <div className="h-px bg-outline-variant/30 my-4 md:my-8"></div>
 
             <h2 className="font-headline-sm text-headline-sm text-primary mb-4 md:mb-6">Resumen</h2>
-            <div className="flex flex-col gap-4 mb-4 md:mb-8">
-              {cart.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-start border-b border-outline-variant/20 pb-4">
+              <ul className="space-y-4 mb-6">
+                {checkoutItems.map((item, idx) => (
+                  <li key={idx} className="flex justify-between items-start border-b border-outline-variant/30 pb-4 last:border-0 last:pb-0">
                   <div className="pr-4">
                     <p className="font-body-md text-primary font-medium text-sm md:text-base">{item.name} <span className="text-on-surface-variant text-xs md:text-sm ml-1">x{item.quantity}</span></p>
                     <p className="font-caption text-caption text-on-surface-variant mt-1">{item.variant}</p>
                   </div>
                   <p className="font-body-md text-primary whitespace-nowrap text-sm md:text-base">${Number(item.price * item.quantity).toLocaleString('es-CL')}</p>
-                </div>
+                  </li>
               ))}
-            </div>
+            </ul>
             <div className="flex justify-between items-center mb-4 md:mb-8">
               <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Total a Pagar</p>
               <p className="font-display-lg-mobile text-primary">${Math.round(total).toLocaleString('es-CL')}</p>

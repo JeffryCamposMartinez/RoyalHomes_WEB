@@ -6,6 +6,13 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
   const navigate = useNavigate();
   const [itemToDelete, setItemToDelete] = React.useState(null);
   
+  // Track selected items by a unique key
+  const [selectedKeys, setSelectedKeys] = React.useState(() => cart.map(item => `${item.id}-${item.variantId}`));
+
+  const toggleSelection = (key) => {
+    setSelectedKeys(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  };
+  
   const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
@@ -48,10 +55,27 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
     };
   });
 
-  const hasErrors = cartItems.some(item => item.error !== null);
-  const totalOriginal = cartItems.filter(i => !i.error).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-  const total = cartItems.filter(i => !i.error).reduce((sum, item) => sum + (item.calcPrice * item.quantity), 0);
+  const allValidKeys = cartItems.filter(i => !i.error).map(item => `${item.id}-${item.variantId}`);
+  const validSelectedKeys = selectedKeys.filter(key => {
+    const item = cartItems.find(i => `${i.id}-${i.variantId}` === key);
+    return item && !item.error;
+  });
+
+  const toggleAll = () => {
+    if (validSelectedKeys.length === allValidKeys.length) {
+      setSelectedKeys([]);
+    } else {
+      setSelectedKeys(allValidKeys);
+    }
+  };
+
+  const selectedCartItems = cartItems.filter(item => validSelectedKeys.includes(`${item.id}-${item.variantId}`));
+
+  const hasSelectedErrors = cartItems.some(item => item.error && selectedKeys.includes(`${item.id}-${item.variantId}`));
+  const totalOriginal = selectedCartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  const total = selectedCartItems.reduce((sum, item) => sum + (item.calcPrice * item.quantity), 0);
   const totalAhorro = totalOriginal - total;
+  const selectedCount = selectedCartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <div className="pt-24 pb-16 px-container-margin-mobile md:px-container-margin-desktop max-w-[1200px] mx-auto min-h-screen">
@@ -72,9 +96,43 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 pb-24 lg:pb-0">
           {/* Left Column: Products */}
           <div className="flex-1 flex flex-col gap-3 md:gap-4">
+            {/* Header: Select All */}
+            <div className="flex items-center gap-3 p-4 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.01)]">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${validSelectedKeys.length > 0 && validSelectedKeys.length === allValidKeys.length ? 'bg-primary border-primary' : 'border-outline group-hover:border-primary'}`}>
+                  {validSelectedKeys.length > 0 && validSelectedKeys.length === allValidKeys.length && <span className="material-symbols-outlined text-[14px] text-on-primary">check</span>}
+                </div>
+                <input 
+                  type="checkbox" 
+                  className="hidden" 
+                  checked={validSelectedKeys.length > 0 && validSelectedKeys.length === allValidKeys.length} 
+                  onChange={toggleAll}
+                />
+                <span className="font-label-md text-sm text-on-surface">Seleccionar todo ({allValidKeys.length})</span>
+              </label>
+            </div>
+
             {cartItems.map((item, idx) => {
+              const itemKey = `${item.id}-${item.variantId}`;
+              const isSelected = selectedKeys.includes(itemKey);
               return (
-                <div key={idx} className={`flex flex-row items-start md:items-center gap-4 p-3 md:p-6 bg-surface-container-lowest border rounded-xl shadow-[0_10px_20px_rgba(0,0,0,0.02)] relative ${item.error ? 'border-error/50 bg-error/5 mt-4' : 'border-outline-variant/30'}`}>
+                <div key={idx} className={`flex flex-row items-start md:items-center gap-3 md:gap-4 p-3 md:p-6 bg-surface-container-lowest border rounded-xl shadow-[0_10px_20px_rgba(0,0,0,0.02)] relative ${item.error ? 'border-error/50 bg-error/5 mt-4' : 'border-outline-variant/30'}`}>
+                  
+                  {/* Selection Checkbox */}
+                  {!item.error && (
+                    <label className="flex items-center cursor-pointer group mt-8 md:mt-0 z-10 shrink-0">
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary' : 'border-outline group-hover:border-primary'}`}>
+                        {isSelected && <span className="material-symbols-outlined text-[14px] text-on-primary">check</span>}
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        className="hidden" 
+                        checked={isSelected} 
+                        onChange={() => toggleSelection(itemKey)}
+                      />
+                    </label>
+                  )}
+
                   {item.error && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-error text-on-error px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-full whitespace-nowrap z-20 shadow-md">
                       {item.error}
@@ -152,11 +210,11 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
                 {totalAhorro > 0 && <span className="text-[10px] text-error font-bold mt-0.5">Ahorras ${Math.round(totalAhorro).toLocaleString('es-CL')}</span>}
               </div>
               <button 
-                onClick={() => navigate('/checkout')}
-                disabled={hasErrors}
-                className={`px-6 py-3 rounded-full font-label-md text-xs uppercase tracking-widest shadow-md transition-all font-bold ${hasErrors ? 'bg-surface-variant text-on-surface-variant opacity-50 cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90'}`}
+                onClick={() => navigate('/checkout', { state: { selectedKeys: validSelectedKeys } })}
+                disabled={hasSelectedErrors || validSelectedKeys.length === 0}
+                className={`px-6 py-3 rounded-full font-label-md text-xs uppercase tracking-widest shadow-md transition-all font-bold ${hasSelectedErrors || validSelectedKeys.length === 0 ? 'bg-surface-variant text-on-surface-variant opacity-50 cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90'}`}
               >
-                Continuar ({cartItems.filter(i => !i.error).reduce((acc, item) => acc + item.quantity, 0)})
+                Continuar ({selectedCount})
               </button>
             </div>
             
@@ -183,14 +241,17 @@ function ShoppingCart({ cart, products, removeFromCart, updateCartQuantity }) {
               
               <div className="flex flex-col gap-4">
                 <button 
-                  onClick={() => navigate('/checkout')}
-                  disabled={hasErrors}
-                  className={`w-full py-4 rounded-full font-label-md uppercase tracking-widest shadow-md transition-all font-bold ${hasErrors ? 'bg-surface-variant text-on-surface-variant opacity-50 cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90 hover:scale-[1.02]'}`}
+                  onClick={() => navigate('/checkout', { state: { selectedKeys: validSelectedKeys } })}
+                  disabled={hasSelectedErrors || validSelectedKeys.length === 0}
+                  className={`w-full py-4 rounded-full font-label-md uppercase tracking-widest shadow-md transition-all font-bold ${hasSelectedErrors || validSelectedKeys.length === 0 ? 'bg-surface-variant text-on-surface-variant opacity-50 cursor-not-allowed' : 'bg-primary text-on-primary hover:bg-primary/90 hover:scale-[1.02]'}`}
                 >
-                  Continuar con la compra
+                  Continuar con la compra ({selectedCount})
                 </button>
-                {hasErrors && (
-                  <p className="text-error text-xs text-center mt-2 font-bold">Elimina los productos sin stock para continuar</p>
+                {hasSelectedErrors && (
+                  <p className="text-error text-xs text-center mt-2 font-bold">Deselecciona o elimina los productos sin stock</p>
+                )}
+                {validSelectedKeys.length === 0 && !hasSelectedErrors && (
+                  <p className="text-on-surface-variant text-xs text-center mt-2">Selecciona al menos un producto para continuar</p>
                 )}
                 <button 
                   onClick={() => navigate('/')}
