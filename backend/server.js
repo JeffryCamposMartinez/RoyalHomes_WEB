@@ -70,6 +70,13 @@ async function runMigrations() {
   }
 
   try {
+    await db.query("ALTER TABLE configuracion_contacto ADD COLUMN tiktok_url VARCHAR(255) DEFAULT NULL");
+    console.log("Migración exitosa: Columna 'tiktok_url' agregada a configuracion_contacto.");
+  } catch (e) {
+    if (e.code !== 'ER_DUP_FIELDNAME') console.error("Error en migración tiktok_url:", e);
+  }
+
+  try {
     await db.query(`
       CREATE TABLE IF NOT EXISTS notificaciones (
         id INT AUTO_INCREMENT PRIMARY KEY,
