@@ -47,8 +47,12 @@ function AdminLayout({ user }) {
           fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/inventory`, { headers })
         ]);
 
-        if (metricsRes.status === 403 || metricsRes.status === 401) {
-          navigate('/');
+        if (
+          [metricsRes.status, staffRes.status, inventoryRes.status].some(status => status === 403 || status === 401)
+        ) {
+          localStorage.removeItem('user');
+          sessionStorage.removeItem('user');
+          window.location.href = '/login';
           return;
         }
 
