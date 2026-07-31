@@ -486,6 +486,14 @@ function MisCompras({ orders, user, initialOrderId }) {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+
+  useEffect(() => {
+    const draft = localStorage.getItem('draftMessage');
+    if (draft) {
+      setNewMessage(draft);
+      localStorage.removeItem('draftMessage');
+    }
+  }, []);
   const chatContainerRef = useRef(null);
   const chatSectionRef = useRef(null);
   const { showAlert } = useAlert();

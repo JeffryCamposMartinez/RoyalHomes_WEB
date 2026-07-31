@@ -140,7 +140,12 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
         } else {
           clearCart();
         }
-        navigate('/profile'); // Redirect to profile to see the order
+        const hasDraft = localStorage.getItem('draftMessage');
+        if (hasDraft) {
+          navigate(`/profile?tab=mensajes&order_id=${data.orderId}`);
+        } else {
+          navigate('/profile'); // Redirect to profile to see the order
+        }
       } else {
         const errorData = await res.json().catch(() => null);
         showAlert(errorData?.error || 'Hubo un problema al procesar la orden. Asegúrate de haber iniciado sesión.', 'error');
@@ -271,14 +276,37 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
                       <h4 className="font-bold text-primary text-sm uppercase tracking-widest mb-1">Coordinación de Tapiz y Tono</h4>
                       <p className="text-sm text-on-surface-variant mb-4">Recuerda que, antes de finalizar tu compra, deberás contactar al vendedor para acordar el color del tapiz o el tono de tu mueble.</p>
                       
-                      <div className="flex flex-col gap-3">
-                        <a href="https://wa.me/56912345678" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#25D366] font-bold hover:opacity-80 transition-opacity w-fit">
-                          <span className="material-symbols-outlined text-[18px]">forum</span> WhatsApp: +56 9 1234 5678
-                        </a>
-                        <button onClick={(e) => { e.preventDefault(); navigate('/profile?tab=mensajes'); }} className="flex items-center gap-2 text-sm text-primary font-bold hover:opacity-80 transition-opacity w-fit">
-                          <span className="material-symbols-outlined text-[18px]">chat</span> Enviar mensaje por la página
-                        </button>
-                      </div>
+                      {(() => {
+                        let text = 'Hola, estoy realizando una compra y necesito coordinar detalles (Tapiz/Tono) para los siguientes productos:\n\n';
+                        checkoutItems.forEach(item => {
+                          const p = item.latestProduct || item.product;
+                          const v = item.latestVariant || item.variant;
+                          text += `- ${p.nombre} (x${item.quantity})\n`;
+                          if (v) text += `  Variante: ${v.material} / ${v.acabado_color}\n`;
+                          const img = v?.imagen_variante || p?.imagen_base || p?.image;
+                          if (img) {
+                             const fullImgUrl = img.startsWith('http') ? img : `${import.meta.env.VITE_API_URL || 'https://api.royalhomes.cl'}${img}`;
+                             text += `  Ref: ${fullImgUrl}\n`;
+                          }
+                        });
+                        const whatsappText = encodeURIComponent(text);
+                        const storeWa = '+56964487232'; // Can be fetched from settings if available
+                        return (
+                          <div className="flex flex-col gap-3">
+                            <a href={`https://wa.me/${storeWa.replace('+', '')}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#25D366] font-bold hover:opacity-80 transition-opacity w-fit">
+                              <span className="material-symbols-outlined text-[18px]">forum</span> WhatsApp: {storeWa}
+                            </a>
+                            <button onClick={(e) => { 
+                              e.preventDefault(); 
+                              localStorage.setItem('draftMessage', text);
+                              localStorage.setItem('draftImages', JSON.stringify(checkoutItems.map(i => (i.latestVariant?.imagen_variante || i.latestProduct?.imagen_base || i.latestProduct?.image))));
+                              showAlert('Haz clic en "Pagar Ahora" para confirmar tu orden. Luego te llevaremos al chat para enviar tu mensaje.', 'info');
+                            }} className="flex items-center gap-2 text-sm text-primary font-bold hover:opacity-80 transition-opacity w-fit">
+                              <span className="material-symbols-outlined text-[18px]">chat</span> Enviar mensaje por la página
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
