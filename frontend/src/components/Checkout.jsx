@@ -279,13 +279,10 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
                       {(() => {
                         let text = 'Hola, estoy realizando una compra y necesito coordinar detalles (Tapiz/Tono) para los siguientes productos:\n\n';
                         checkoutItems.forEach(item => {
-                          const p = item.latestProduct || item.product;
-                          const v = item.latestVariant || item.variant;
-                          text += `- ${p.nombre} (x${item.quantity})\n`;
-                          if (v) text += `  Variante: ${v.material} / ${v.acabado_color}\n`;
-                          const img = v?.imagen_variante || p?.imagen_base || p?.image;
-                          if (img) {
-                             const fullImgUrl = img.startsWith('http') ? img : `${import.meta.env.VITE_API_URL || 'https://api.royalhomes.cl'}${img}`;
+                          text += `- ${item.name} (x${item.quantity})\n`;
+                          if (item.variant) text += `  Variante: ${item.variant}\n`;
+                          if (item.image) {
+                             const fullImgUrl = item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'https://api.royalhomes.cl'}${item.image}`;
                              text += `  Ref: ${fullImgUrl}\n`;
                           }
                         });
@@ -299,7 +296,7 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
                             <button onClick={(e) => { 
                               e.preventDefault(); 
                               localStorage.setItem('draftMessage', text);
-                              localStorage.setItem('draftImages', JSON.stringify(checkoutItems.map(i => (i.latestVariant?.imagen_variante || i.latestProduct?.imagen_base || i.latestProduct?.image))));
+                              localStorage.setItem('draftImages', JSON.stringify(checkoutItems.map(i => i.image).filter(Boolean)));
                               showAlert('Haz clic en "Pagar Ahora" para confirmar tu orden. Luego te llevaremos al chat para enviar tu mensaje.', 'info');
                             }} className="flex items-center gap-2 text-sm text-primary font-bold hover:opacity-80 transition-opacity w-fit">
                               <span className="material-symbols-outlined text-[18px]">chat</span> Enviar mensaje por la página
