@@ -93,6 +93,19 @@ async function runMigrations() {
   } catch (e) {
     console.error("Error en migración notificaciones:", e);
   }
+
+  // Create admin account if it doesn't exist
+  try {
+    const adminEmail = 'admin@royalhomes.cl';
+    const [existing] = await db.query('SELECT id FROM usuarios WHERE email = ?', [adminEmail]);
+    if (existing.length === 0) {
+      const adminHash = '$2b$10$9C6YvRNK1TBmkSZiHTiaY.j7dnxJvIahdojS0y03KThgi74LH6HTq';
+      await db.query('INSERT INTO usuarios (nombre, email, password_hash, rol_id) VALUES (?, ?, ?, ?)', ['Admin', adminEmail, adminHash, 1]);
+      console.log('Cuenta de admin predeterminada creada exitosamente.');
+    }
+  } catch (e) {
+    console.error("Error creando cuenta de admin:", e);
+  }
 }
 runMigrations();
 
