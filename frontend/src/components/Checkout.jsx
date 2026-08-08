@@ -38,6 +38,8 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
     return userStr ? JSON.parse(userStr).accessToken : null;
   };
 
+  const [contactSettings, setContactSettings] = useState(null);
+
   useEffect(() => {
     const fetchProfile = async () => {
       const token = getToken();
@@ -62,7 +64,21 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
         setLoadingProfile(false);
       }
     };
+    
+    const fetchContactSettings = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/products/contact`);
+        if (res.ok) {
+          const data = await res.json();
+          setContactSettings(data);
+        }
+      } catch (err) {
+        console.error("Error fetching contact settings", err);
+      }
+    };
+
     fetchProfile();
+    fetchContactSettings();
   }, []);
 
   const handleSaveNewAddress = async (formData) => {
@@ -254,7 +270,7 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
                 <input type="radio" name="entrega" value="retiro_fisico" checked={metodoEntrega === 'retiro_fisico'} onChange={(e) => setMetodoEntrega(e.target.value)} className="w-4 h-4 text-primary" />
                 <div>
                   <span className="font-bold text-primary text-xs md:text-sm uppercase tracking-widest block">Retiro en Tienda Física</span>
-                  <span className="text-xs md:text-sm text-on-surface-variant block mt-1">Av. Vitacura 2345, Santiago</span>
+                  <span className="text-xs md:text-sm text-on-surface-variant block mt-1">{contactSettings?.direccion_fisica || 'Av. Vitacura 2345, Santiago'}</span>
                 </div>
               </label>
               
@@ -287,10 +303,10 @@ function Checkout({ cart, clearCart, removePurchasedItems }) {
                           }
                         });
                         const whatsappText = encodeURIComponent(text);
-                        const storeWa = '+56964487232'; // Can be fetched from settings if available
+                        const storeWa = contactSettings?.whatsapp || '+56964487232';
                         return (
                           <div className="flex flex-col gap-3">
-                            <a href={`https://wa.me/${storeWa.replace('+', '')}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#25D366] font-bold hover:opacity-80 transition-opacity w-fit">
+                            <a href={`https://wa.me/${storeWa.replace('+', '').replace(/\s/g, '')}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#25D366] font-bold hover:opacity-80 transition-opacity w-fit">
                               <span className="material-symbols-outlined text-[18px]">forum</span> WhatsApp: {storeWa}
                             </a>
                             <button onClick={(e) => { 
