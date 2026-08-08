@@ -43,15 +43,17 @@ exports.createOrder = async (req, res) => {
     
     await connection.commit();
     
-    // Notificar a todos los admins
-    const [admins] = await connection.query('SELECT id FROM usuarios WHERE rol_id = 1');
-    for (const admin of admins) {
-      await connection.query(
-        'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
-        [admin.id, 'nuevo_pedido', `Nueva solicitud de Pedido #${orderId}`, orderId]
-      );
-      if (req.io) {
-        req.io.emit(`nueva_notificacion_${admin.id}`);
+    // Notificar a todos los admins (solo si no es pago directo, ya que el pago directo notificará al pagarse)
+    if (!direct_payment) {
+      const [admins] = await connection.query('SELECT id FROM usuarios WHERE rol_id = 1');
+      for (const admin of admins) {
+        await connection.query(
+          'INSERT INTO notificaciones (usuario_id, tipo, mensaje, referencia_id) VALUES (?, ?, ?, ?)',
+          [admin.id, 'nuevo_pedido', `Nueva solicitud de Pedido #${orderId}`, orderId]
+        );
+        if (req.io) {
+          req.io.emit(`nueva_notificacion_${admin.id}`);
+        }
       }
     }
     
@@ -112,9 +114,9 @@ exports.getMyOrders = async (req, res) => {
   try {
     const [orders] = await connection.query(
       `SELECT p.*, e.nombre as estado
-       FROM pedidos p
-       JOIN estados_pedido e ON p.estado_id = e.id
-       WHERE p.usuario_id = ?
+       FROM pedidos p 
+       JOIN estados_pedido e ON p.estado_id = e.id 
+       WHERE p.usuario_id = ? AND p.estado_id != 6
        ORDER BY p.creado_en DESC`,
       [userId]
     );

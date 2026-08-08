@@ -9,8 +9,8 @@ const getFullUrl = (url) => {
 
 exports.getMetrics = async (req, res) => {
   try {
-    const [[{ totalRevenue }]] = await db.query('SELECT SUM(total) as totalRevenue FROM pedidos');
-    const [[{ totalOrders }]] = await db.query('SELECT COUNT(id) as totalOrders FROM pedidos');
+    const [[{ totalRevenue }]] = await db.query('SELECT SUM(total) as totalRevenue FROM pedidos WHERE estado_id != 6');
+    const [[{ totalOrders }]] = await db.query('SELECT COUNT(id) as totalOrders FROM pedidos WHERE estado_id != 6');
     const [[{ activeUsers }]] = await db.query('SELECT COUNT(id) as activeUsers FROM usuarios WHERE activo = 1');
     const [[{ lowStock }]] = await db.query('SELECT COUNT(id) as lowStock FROM variantes_producto WHERE stock < 10');
 
@@ -309,6 +309,7 @@ exports.getAllOrders = async (req, res) => {
       FROM pedidos p 
       JOIN estados_pedido e ON p.estado_id = e.id 
       JOIN usuarios u ON p.usuario_id = u.id 
+      WHERE p.estado_id != 6
       ORDER BY p.creado_en DESC
     `);
     res.json(orders);
